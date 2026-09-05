@@ -1,7 +1,7 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "@south-paw/typeface-minecraft";
-import { renderPois, fromLatLng, toLatLng, setupMapImage, mapQuadrants, pois } from "map-render";
+import { renderPois, fromLatLng, heightAt, toLatLng, setupMapImage, mapQuadrants, pois } from "map-render";
 
 
 // permissive range so getBoundsZoom below isn't clamped to Leaflet's default 0..18
@@ -81,7 +81,8 @@ const mouseCoords = document.getElementById("mouse-coords") as HTMLElement;
 
 map.on("mousemove", (event: L.LeafletMouseEvent) => {
   const { x, y } = fromLatLng(event.latlng.lat, event.latlng.lng);
-  mouseCoords.textContent = `X: ${Math.round(x)} Z: ${Math.round(y)}`;
+  const height = heightAt(x, y);
+  mouseCoords.textContent = `X: ${Math.round(x)} Z: ${Math.round(y)} Y: ${height ?? "?"}`;
 });
 
 const { colorGroups, listEntries } = renderPois(map, pois, {});

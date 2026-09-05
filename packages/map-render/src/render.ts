@@ -1,6 +1,7 @@
 import L from "leaflet";
 import { isZone, type PointOfInterest } from "./poi.ts";
 import rawLevels from "./levels.json";
+import { mapQuadrants } from "./map-data.ts";
 
 // must match the --scale used to generate out/map.png (voxelmap-to-image):
 // 1 world block covers MAP_SCALE x MAP_SCALE pixels in the embedded image
@@ -8,6 +9,11 @@ export const MAP_SCALE = 16;
 
 // one Minecraft chunk = 16x16 blocks
 export const CHUNK_SIZE = 16;
+
+// VoxelMap's sentinel for "no cached data" (Short.MIN_VALUE) — duplicated from
+// voxelmap-to-image/src/regions.ts rather than imported: that package pulls in
+// adm-zip/pngjs, Node-only, which would break this browser bundle
+const NO_DATA_HEIGHT = -32768;
 
 const DEFAULT_POI_COLOR = "red";
 
@@ -48,6 +54,50 @@ export function toLatLng(worldX: number, worldZ: number): L.LatLngTuple {
 // inverse of toLatLng — used by the admin to turn a map click back into world x/z
 export function fromLatLng(lat: number, lng: number): { x: number; y: number } {
   return { x: lng / MAP_SCALE, y: -lat / MAP_SCALE };
+}
+
+
+// picks which of the 4 forced-origin quadrants a world block belongs to —
+// mirrors voxelmap-to-image's own quadrantOf()
+function quadrantKeyFor(worldX: number, worldZ: number): "pxpy" | "nxpy" | "pxny" | "nxny" {
+  if (worldX >= 0 && worldZ >= 0) return "pxpy";
+  if (worldX < 0 && worldZ >= 0) return "nxpy";
+  if (worldX >= 0 && worldZ < 0) return "pxny";
+  return "nxny";
+}
+
+const heightArrayCache = new Map<string, Int16Array>();
+
+// base64 -> Int16Array, decoded once per quadrant and cached
+function decodeHeights(base64: string): Int16Array {
+  let heights = heightArrayCache.get(base64);
+  if (!heights) {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    heights = new Int16Array(bytes.buffer);
+    heightArrayCache.set(base64, heights);
+  }
+  return heights;
+}
+
+// real Minecraft terrain height (Y level) at a world (x, z), or undefined if
+// out of the embedded data's range or VoxelMap never recorded that column
+export function heightAt(worldX: number, worldZ: number): number | undefined {
+  const key = quadrantKeyFor(worldX, worldZ);
+  const quadrant = mapQuadrants[key];
+  if (!quadrant?.heightsBase64) return undefined;
+
+  const blockX = Math.floor(worldX);
+  const blockZ = Math.floor(worldZ);
+  // each quadrant's near edge (touching world 0) is forced at index 0 or at
+  // the far index — same rule toLatLng/quadrantBounds already rely on
+  const column = key === "pxpy" || key === "pxny" ? blockX : blockX + quadrant.heightsWidth;
+  const row = key === "pxpy" || key === "nxpy" ? blockZ : blockZ + quadrant.heightsHeight;
+  if (column < 0 || column >= quadrant.heightsWidth || row < 0 || row >= quadrant.heightsHeight) return undefined;
+
+  const value = decodeHeights(quadrant.heightsBase64)[row * quadrant.heightsWidth + column];
+  return value === NO_DATA_HEIGHT ? undefined : value;
 }
 
 export function createPopupContent(title: string, description?: string): HTMLElement {

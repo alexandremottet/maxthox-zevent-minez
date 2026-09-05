@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { PNG } from "pngjs";
 import { extractBlockId, getRealBlockColor, isAirBlock } from "./blockColors.js";
-import { BLOCKSTATEPOS, HEIGHTPOS, PLANE_SIZE, REGION_SIZE, type Region, type RegionFile, listRegionFiles, loadRegion, shortPlane } from "./regions.js";
+import { BLOCKSTATEPOS, HEIGHTPOS, NO_DATA_HEIGHT, PLANE_SIZE, REGION_SIZE, type Region, type RegionFile, listRegionFiles, loadRegion, shortPlane } from "./regions.js";
 
 const DEFAULT_SCALE = 4;
 
@@ -66,15 +66,14 @@ function hslToRgb(h: number, s: number, l: number): [number, number, number] {
   return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
 }
 
-function renderSurfaceImage(region: Region): Buffer {
-  const heights = shortPlane(region.data, HEIGHTPOS, true);
+function renderSurfaceImage(region: Region, heights: Int32Array): Buffer {
   const blockstateIds = shortPlane(region.data, BLOCKSTATEPOS, false);
   const rgba = Buffer.alloc(PLANE_SIZE * 4);
   const colorCache = new Map<number, [number, number, number]>();
   const airCache = new Map<number, boolean>();
 
   for (let i = 0; i < PLANE_SIZE; i++) {
-    const noData = heights[i] === -32768;
+    const noData = heights[i] === NO_DATA_HEIGHT;
     let color: [number, number, number] = [0, 0, 0];
     let alpha = 0;
     if (!noData) {
@@ -127,7 +126,7 @@ function stitchQuadrant(
   files: RegionFile[],
   positiveX: boolean,
   positiveZ: boolean,
-): { width: number; height: number; rgba: Buffer } {
+): { width: number; height: number; rgba: Buffer; heights: Int16Array } {
   const minX = positiveX ? 0 : Math.min(...files.map((f) => f.x));
   const maxX = positiveX ? Math.max(...files.map((f) => f.x)) : -1;
   const minZ = positiveZ ? 0 : Math.min(...files.map((f) => f.z));
@@ -135,20 +134,24 @@ function stitchQuadrant(
   const width = (maxX - minX + 1) * REGION_SIZE;
   const height = (maxZ - minZ + 1) * REGION_SIZE;
   const rgba = Buffer.alloc(width * height * 4);
+  // one entry per block, no upscale — a heightmap doesn't benefit from it
+  const heights = new Int16Array(width * height).fill(NO_DATA_HEIGHT);
 
   for (const file of files) {
     const region = loadRegion(file.path);
-    const tile = renderSurfaceImage(region);
+    const tileHeights = shortPlane(region.data, HEIGHTPOS, true);
+    const tile = renderSurfaceImage(region, tileHeights);
     const originX = (file.x - minX) * REGION_SIZE;
     const originZ = (file.z - minZ) * REGION_SIZE;
     for (let row = 0; row < REGION_SIZE; row++) {
       const srcStart = row * REGION_SIZE * 4;
       const destStart = ((originZ + row) * width + originX) * 4;
       tile.copy(rgba, destStart, srcStart, srcStart + REGION_SIZE * 4);
+      heights.set(tileHeights.subarray(row * REGION_SIZE, (row + 1) * REGION_SIZE), (originZ + row) * width + originX);
     }
   }
 
-  return { width, height, rgba };
+  return { width, height, rgba, heights };
 }
 
 function upscale(width: number, height: number, rgba: Buffer, factor: number): { width: number; height: number; rgba: Buffer } {
@@ -178,6 +181,10 @@ function writePng(width: number, height: number, rgba: Buffer, outputPath: strin
   writeFileSync(outputPath, PNG.sync.write(png));
 }
 
+function writeHeights(heights: Int16Array, outputPath: string): void {
+  writeFileSync(outputPath, Buffer.from(heights.buffer, heights.byteOffset, heights.byteLength));
+}
+
 function main(): void {
   const opts = parseArgs(process.argv.slice(2));
   const files = listRegionFiles(opts.inputDir);
@@ -194,6 +201,10 @@ function main(): void {
     const outPath = join(opts.outputDir, `map-${key}.png`);
     writePng(width, height, rgba, outPath);
     console.log(`wrote ${outPath} (${width}x${height}, ${quadrantFiles.length} regions, x${opts.scale})`);
+
+    const heightsPath = join(opts.outputDir, `heights-${key}.bin`);
+    writeHeights(stitched.heights, heightsPath);
+    console.log(`wrote ${heightsPath} (${stitched.width}x${stitched.height} blocks)`);
   }
 }
 
