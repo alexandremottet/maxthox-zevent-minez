@@ -118,6 +118,19 @@ function pointMarker(x, z, label, color) {
   return rectMarker(x - POINT_MARKER_HALF_SIZE, z - POINT_MARKER_HALF_SIZE, x + POINT_MARKER_HALF_SIZE, z + POINT_MARKER_HALF_SIZE, label, color);
 }
 
+// always-visible text label (a BlueMap "html" marker — a CSS2D DOM overlay,
+// unlike shape/poi markers whose label is only a click-to-open popup) so the
+// percentage reads directly off the map, matching the Leaflet overlay's
+// permanent tooltip
+function textLabel(x, z, text) {
+  return {
+    type: "html",
+    position: { x, y: 64, z },
+    html: text,
+    classes: ["percent-label"],
+  };
+}
+
 const levels = JSON.parse(readFileSync(join(mapRenderSrc, "levels.json"), "utf8"));
 const levelColor = new Map(levels.map((level) => [level.name, level.color]));
 
@@ -131,10 +144,18 @@ for (const { x, y: z, level } of chunkPois) {
   chunkMarkersByLevel.get(level)[`chunk_${x}_${z}`] = shapeMarker(x, z, level, hexToRgb(levelColor.get(level)));
 }
 
+// only chunks chunk-scanner actually classified into a level (the same set
+// shown as level-colored chunks) get a percent marker — the raw scan covers
+// every explored chunk, most of which were never part of the dig zone at all
+const classifiedChunkKeys = new Set(chunkPois.map(({ x, y: z }) => `${x},${z}`));
+
 const chunkPercents = readGeneratedArray(join(mapRenderSrc, "percent-data.ts"));
 const percentMarkers = {};
 for (const { x, z, percent } of chunkPercents) {
+  if (!classifiedChunkKeys.has(`${x},${z}`)) continue;
+  const center = { x: x + CHUNK_SIZE / 2, z: z + CHUNK_SIZE / 2 };
   percentMarkers[`percent_${x}_${z}`] = shapeMarker(x, z, `${percent.toFixed(0)}%`, percentToRgb(percent));
+  percentMarkers[`percentLabel_${x}_${z}`] = textLabel(center.x, center.z, `${percent.toFixed(0)}%`);
 }
 
 // mirrors render.ts's category split for everything that isn't a chunk POI:
@@ -199,6 +220,7 @@ const truncated = conf.slice(0, markerSetsLine);
 writeFileSync(overworldConfPath, `${truncated}marker-sets: ${JSON.stringify(markerSets, null, 2)}\n`);
 
 console.log(
-  `wrote ${chunkPois.length} chunk, ${chunkPercents.length} percent, ${Object.keys(zoneMarkers).length} zone, ` +
-    `${Object.keys(startupMarkers).length} startup, ${Object.keys(otherMarkers).length} other marker(s) to ${overworldConfPath}`,
+  `wrote ${chunkPois.length} chunk, ${classifiedChunkKeys.size} percent (of ${chunkPercents.length} scanned), ` +
+    `${Object.keys(zoneMarkers).length} zone, ${Object.keys(startupMarkers).length} startup, ` +
+    `${Object.keys(otherMarkers).length} other marker(s) to ${overworldConfPath}`,
 );

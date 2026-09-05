@@ -130,6 +130,15 @@ function stopBlueMapCoords(): void {
   blueMapCoordsTimer = undefined;
 }
 
+// --- credits dialog ---
+
+const creditsDialog = document.getElementById("credits-dialog") as HTMLDialogElement;
+const toggleCreditsButton = document.getElementById("toggle-credits") as HTMLButtonElement;
+const creditsCloseButton = document.getElementById("credits-close") as HTMLButtonElement;
+
+toggleCreditsButton.addEventListener("click", () => creditsDialog.showModal());
+creditsCloseButton.addEventListener("click", () => creditsDialog.close());
+
 const { categoryGroups, listEntries, setChunkLabelsVisible } = renderPois(map, pois, {});
 
 // --- POI list panel ---

@@ -59,6 +59,51 @@ import Analytics from '@vercel/analytics/astro'
         text-decoration: none;
       }
 
+      .hud-credits-button {
+        left: auto;
+        right: 12px;
+        bottom: 12px;
+        transform: none;
+        padding: 4px 10px;
+        font-size: 13px;
+      }
+
+      dialog#credits-dialog {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin: 0;
+        background: #000;
+        border: 3px solid #fff;
+        border-radius: 0;
+        color: #fff;
+        font-family: "Minecraft", monospace;
+        padding: 16px;
+        min-width: 280px;
+        max-width: 90vw;
+        z-index: 2000;
+      }
+
+      dialog#credits-dialog::backdrop {
+        background: rgba(0, 0, 0, 0.6);
+      }
+
+      dialog#credits-dialog h2 {
+        margin: 0 0 12px;
+        font-size: 16px;
+      }
+
+      .credits-section {
+        margin-bottom: 12px;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .credits-section a {
+        color: #7d7dff;
+      }
+
       .hud-button {
         background: #000;
         border: 1px solid #fff;
@@ -275,6 +320,28 @@ import Analytics from '@vercel/analytics/astro'
     </div>
 
     <div id="mouse-coords" class="hud-bar hud-coords">X: -- Z: -- Y: --</div>
+
+    <button id="toggle-credits" class="hud-bar hud-button hud-credits-button" aria-label="Credits">Credits</button>
+
+    <dialog id="credits-dialog">
+      <h2 class="minecraft-white">Credits</h2>
+      <div class="credits-section">
+        <strong>BlueMap</strong> — MIT License<br />
+        <a href="https://bluemap.bluecolored.de/" target="_blank" rel="noopener">bluemap.bluecolored.de</a>
+      </div>
+      <div class="credits-section">
+        <strong>Mathox</strong><br />
+        <a href="https://www.twitch.tv/mathox" target="_blank" rel="noopener">twitch.tv/mathox</a>
+      </div>
+      <div class="credits-section">
+        <strong>La communauté</strong> — merci à tous les participants !
+      </div>
+      <div class="credits-section">
+        <strong>Code source</strong><br />
+        <a href="https://github.com/alexandremottet/maxthox-zevent-minez" target="_blank" rel="noopener">github.com/alexandremottet/maxthox-zevent-minez</a>
+      </div>
+      <button id="credits-close" class="hud-button">Close</button>
+    </dialog>
 
     <a
       href="https://docs.google.com/spreadsheets/d/1cbilaeHhUOLCptyXpI7dtu5CSrSVA8mt/edit?gid=917933655#gid=917933655"

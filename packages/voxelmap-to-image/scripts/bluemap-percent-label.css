@@ -1,0 +1,12 @@
+/* always-visible percent-overlay text label (see generate-bluemap-markers.mjs's
+   textLabel/"html" marker) — no chrome, matches the Leaflet overlay's plain
+   permanent tooltip; pointer-events:none so it never blocks map interaction */
+.percent-label {
+  color: #fff;
+  text-shadow: 1px 1px 0 #000;
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+  pointer-events: none;
+}

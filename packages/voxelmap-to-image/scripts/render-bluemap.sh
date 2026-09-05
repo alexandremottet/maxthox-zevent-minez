@@ -43,27 +43,28 @@ perl -i -pe "s|^world: .*|world: \"$WORLD_SAVE\"|" "$MAP_CONFIG"
 # outlines as the Leaflet viewer
 node "$SCRIPT_DIR/generate-bluemap-markers.mjs"
 
+# storage compression must stay "none" (config/storages/file.conf) — this
+# stack's static servers (Vite dev/preview, and likely Vercel/GH Pages too)
+# auto-add Content-Encoding: gzip for .gz-suffixed files and decompress
+# transparently, which breaks webapp.conf's client-decompression (it then
+# tries to gzip-decompress the already-decompressed body a second time).
+# Wiping web/maps first (rather than relying on -f alone) avoids stale
+# cross-format leftovers if this ever ran with a different compression setting.
+rm -rf "$CLI_DIR/web/maps"
 echo "rendering $WORLD_SAVE with $(basename "$JAR")..."
-# -f (force) matters here: viewer/admin serve these files as plain static
-# assets with no Content-Encoding support, so storage compression must stay
-# "none" (see config/storages/file.conf) — force-render guarantees a config
-# change like that actually rewrites existing tiles instead of being skipped
-# as "already up to date". --markers applies the marker-sets config above.
 (cd "$CLI_DIR" && java -jar "$(basename "$JAR")" -g -f -r --markers)
 
-# stale .gz files from a render made before compression was set to "none" —
-# storage never deletes them on its own when the format changes
-find "$CLI_DIR/web/maps" -name '*.gz' -delete
-
-# custom script referenced by webapp.conf's `scripts` list — not managed by
-# BlueMap itself, so it has to be placed into the webroot on every publish
-mkdir -p "$CLI_DIR/web/js"
+# custom script/style referenced by webapp.conf's `scripts`/`styles` lists —
+# not managed by BlueMap itself, so they have to be placed into the webroot
+# on every publish
+mkdir -p "$CLI_DIR/web/js" "$CLI_DIR/web/css"
 cp "$SCRIPT_DIR/bluemap-default-view.js" "$CLI_DIR/web/js/default-view.js"
+cp "$SCRIPT_DIR/bluemap-percent-label.css" "$CLI_DIR/web/css/percent-label.css"
 
 for app in voxelmap-viewer voxelmap-admin; do
   DEST="$REPO_ROOT/apps/$app/public/bluemap"
   rm -rf "$DEST"
   mkdir -p "$DEST"
-  cp -R "$CLI_DIR/web/index.html" "$CLI_DIR/web/settings.json" "$CLI_DIR/web/assets" "$CLI_DIR/web/lang" "$CLI_DIR/web/maps" "$CLI_DIR/web/js" "$DEST/"
+  cp -R "$CLI_DIR/web/index.html" "$CLI_DIR/web/settings.json" "$CLI_DIR/web/assets" "$CLI_DIR/web/lang" "$CLI_DIR/web/maps" "$CLI_DIR/web/js" "$CLI_DIR/web/css" "$DEST/"
   echo "published to apps/$app/public/bluemap ($(du -sh "$DEST" | cut -f1))"
 done
