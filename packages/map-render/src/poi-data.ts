@@ -366,5 +366,35 @@ export const pois: PointOfInterest[] = [
     "type": "chunk",
     "x": 16,
     "y": 160
+  },
+  {
+    "title": "c",
+    "type": "chunk",
+    "x": -32,
+    "y": 128
+  },
+  {
+    "title": "c",
+    "type": "chunk",
+    "x": -32,
+    "y": 144
+  },
+  {
+    "title": "c",
+    "type": "chunk",
+    "x": -32,
+    "y": 160
+  },
+  {
+    "title": "c",
+    "type": "chunk",
+    "x": -16,
+    "y": 144
+  },
+  {
+    "title": "c",
+    "type": "chunk",
+    "x": -16,
+    "y": 160
   }
 ];
