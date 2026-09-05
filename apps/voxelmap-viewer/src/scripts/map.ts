@@ -36,8 +36,6 @@ function updateZoomButtons() {
 map.on("zoomend", updateZoomButtons);
 updateZoomButtons();
 
-(window as unknown as { __map: L.Map }).__map = map;
-
 function createPopupContent(title: string, description?: string): HTMLElement {
   const container = document.createElement("div");
   container.className = "poi-popup";
