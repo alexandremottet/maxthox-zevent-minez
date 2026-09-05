@@ -42,6 +42,20 @@ jobs:
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
 
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Download BlueMap CLI
+        run: |
+          mkdir -p packages/voxelmap-to-image/bluemap-cli
+          curl -fL -o packages/voxelmap-to-image/bluemap-cli/bluemap-5.23-cli.jar \
+            https://github.com/BlueMap-Minecraft/BlueMap/releases/download/v5.23/bluemap-5.23-cli.jar
+
+      - name: Render BlueMap
+        run: pnpm --filter voxelmap-to-image run bluemap
+
       - name: Build Astro app
         run: pnpm --filter voxelmap-viewer run build
 

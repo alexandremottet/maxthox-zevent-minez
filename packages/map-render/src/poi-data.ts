@@ -255,7 +255,7 @@ export const pois: PointOfInterest[] = [
     "type": "chunk",
     "x": 48,
     "y": 32,
-    "level": "almost"
+    "level": "done"
   },
   {
     "title": "c",
@@ -393,22 +393,9 @@ export const pois: PointOfInterest[] = [
   {
     "title": "c",
     "type": "chunk",
-    "x": 320,
-    "y": 320,
-    "level": "done"
-  },
-  {
-    "title": "c",
-    "type": "chunk",
-    "x": 335,
-    "y": 351
-  },
-  {
-    "title": "c",
-    "type": "chunk",
     "x": 16,
     "y": 128,
-    "level": "almost"
+    "level": "done"
   },
   {
     "title": "c",
@@ -594,7 +581,7 @@ export const pois: PointOfInterest[] = [
     "x": 32,
     "y": -128,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 16,
@@ -750,7 +737,7 @@ export const pois: PointOfInterest[] = [
     "x": 32,
     "y": 144,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 80,
@@ -762,7 +749,7 @@ export const pois: PointOfInterest[] = [
     "x": 32,
     "y": 160,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 0,
@@ -773,12 +760,6 @@ export const pois: PointOfInterest[] = [
   {
     "x": 16,
     "y": 176,
-    "type": "chunk",
-    "level": "done"
-  },
-  {
-    "x": 336,
-    "y": 352,
     "type": "chunk",
     "level": "done"
   },
@@ -834,7 +815,7 @@ export const pois: PointOfInterest[] = [
     "x": 144,
     "y": -48,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 144,
@@ -858,7 +839,7 @@ export const pois: PointOfInterest[] = [
     "x": -16,
     "y": -96,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 0,
@@ -876,43 +857,43 @@ export const pois: PointOfInterest[] = [
     "x": 48,
     "y": -144,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 64,
     "y": -144,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 96,
     "y": -144,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 48,
     "y": -128,
     "type": "chunk",
-    "level": "ongoing"
+    "level": "almost"
   },
   {
     "x": 64,
     "y": -128,
     "type": "chunk",
-    "level": "started"
+    "level": "almost"
   },
   {
     "x": 80,
     "y": -128,
     "type": "chunk",
-    "level": "started"
+    "level": "done"
   },
   {
     "x": 0,
     "y": -112,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 112,
@@ -924,19 +905,19 @@ export const pois: PointOfInterest[] = [
     "x": 0,
     "y": -96,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 112,
     "y": -96,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 128,
     "y": -96,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 128,
@@ -960,13 +941,13 @@ export const pois: PointOfInterest[] = [
     "x": 128,
     "y": -64,
     "type": "chunk",
-    "level": "started"
+    "level": "done"
   },
   {
     "x": 160,
     "y": -64,
     "type": "chunk",
-    "level": "started"
+    "level": "done"
   },
   {
     "x": 176,
@@ -978,7 +959,7 @@ export const pois: PointOfInterest[] = [
     "x": 160,
     "y": -48,
     "type": "chunk",
-    "level": "ongoing"
+    "level": "done"
   },
   {
     "x": 176,
@@ -996,13 +977,13 @@ export const pois: PointOfInterest[] = [
     "x": 176,
     "y": -32,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 80,
     "y": 48,
     "type": "chunk",
-    "level": "ongoing"
+    "level": "almost"
   },
   {
     "x": 16,
@@ -1026,73 +1007,73 @@ export const pois: PointOfInterest[] = [
     "x": 544,
     "y": -64,
     "type": "chunk",
-    "level": "started"
+    "level": "done"
   },
   {
     "x": -16,
     "y": -112,
     "type": "chunk",
-    "level": "started"
+    "level": "done"
   },
   {
     "x": 80,
     "y": -144,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 112,
     "y": -128,
     "type": "chunk",
-    "level": "started"
+    "level": "almost"
   },
   {
     "x": 32,
     "y": 48,
     "type": "chunk",
-    "level": "started"
+    "level": "done"
   },
   {
     "x": 48,
     "y": 48,
     "type": "chunk",
-    "level": "started"
+    "level": "done"
   },
   {
     "x": 64,
     "y": 48,
     "type": "chunk",
-    "level": "ongoing"
+    "level": "done"
   },
   {
     "x": -16,
     "y": -128,
     "type": "chunk",
-    "level": "started"
+    "level": "done"
   },
   {
     "x": 16,
     "y": 64,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 32,
     "y": 64,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 48,
     "y": 64,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 64,
     "y": 64,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 80,
@@ -1127,6 +1108,60 @@ export const pois: PointOfInterest[] = [
   {
     "x": 48,
     "y": 96,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "title": "Lit",
+    "color": "yellow",
+    "x": 556,
+    "y": -14
+  },
+  {
+    "x": -16,
+    "y": 128,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 0,
+    "y": -144,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 16,
+    "y": 48,
+    "type": "chunk",
+    "level": "ongoing"
+  },
+  {
+    "x": 64,
+    "y": 96,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 0,
+    "y": 112,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 16,
+    "y": 112,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 32,
+    "y": 112,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 0,
+    "y": 128,
     "type": "chunk",
     "level": "started"
   }

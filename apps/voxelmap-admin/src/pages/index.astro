@@ -53,6 +53,42 @@ const pois = await listPois();
       .hud-button:hover:not(:disabled) { background: #333; }
       .hud-button:disabled { opacity: 0.4; cursor: default; }
 
+      .hud-select {
+        background: #000;
+        border: 1px solid #fff;
+        color: #fff;
+        font-family: "Minecraft", monospace;
+        font-size: 16px;
+        line-height: 1;
+        padding: 6px 8px;
+        cursor: pointer;
+      }
+
+      .hud-visualizer-placeholder {
+        position: fixed;
+        inset: 0;
+        background: #052305;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Minecraft", monospace;
+        color: #fff;
+        font-size: 24px;
+        text-shadow: 2px 2px 0 #000;
+        z-index: 900;
+      }
+
+      .hud-visualizer-placeholder[hidden] { display: none; }
+
+      .hud-visualizer-iframe {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+      .hud-visualizer-iframe[hidden] { display: none; }
+
       .hud-button-green {
         border-color: #55ff55;
         color: #55ff55;
@@ -300,6 +336,10 @@ const pois = await listPois();
   </head>
   <body>
     <div id="map"></div>
+    <div id="visualizer-placeholder" class="hud-visualizer-placeholder" hidden>
+      <span id="visualizer-placeholder-label"></span>
+      <iframe id="visualizer-iframe" class="hud-visualizer-iframe" title="Alternate map visualizer" hidden></iframe>
+    </div>
 
     <div class="hud-bar hud-title">
       <span class="minecraft-green">VOXELMAP</span>
@@ -319,6 +359,7 @@ const pois = await listPois();
       <button id="add-poi" class="hud-button hud-button-green" aria-label="Add POI">+ POI</button>
       <button id="deploy" class="hud-button hud-button-blue" aria-label="Deploy">Deploy</button>
       <button id="logout" class="hud-button" aria-label="Log out">Logout</button>
+      <select id="visualizer-select" class="hud-select" aria-label="Choose map visualizer"></select>
     </div>
 
     <dialog id="add-poi-dialog">

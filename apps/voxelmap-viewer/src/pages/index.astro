@@ -68,6 +68,42 @@ import Analytics from '@vercel/analytics/astro'
       .hud-button:disabled { opacity: 0.4; cursor: default; }
       .hud-button.active { background: #333; }
 
+      .hud-select {
+        background: #000;
+        border: 1px solid #fff;
+        color: #fff;
+        font-family: "Minecraft", monospace;
+        font-size: 16px;
+        line-height: 1;
+        padding: 6px 8px;
+        cursor: pointer;
+      }
+
+      .hud-visualizer-placeholder {
+        position: fixed;
+        inset: 0;
+        background: #052305;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Minecraft", monospace;
+        color: #fff;
+        font-size: 24px;
+        text-shadow: 2px 2px 0 #000;
+        z-index: 900;
+      }
+
+      .hud-visualizer-placeholder[hidden] { display: none; }
+
+      .hud-visualizer-iframe {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+      .hud-visualizer-iframe[hidden] { display: none; }
+
       .hud-panel {
         position: fixed;
         top: 60px;
@@ -216,6 +252,10 @@ import Analytics from '@vercel/analytics/astro'
   </head>
   <body>
     <div id="map"></div>
+    <div id="visualizer-placeholder" class="hud-visualizer-placeholder" hidden>
+      <span id="visualizer-placeholder-label"></span>
+      <iframe id="visualizer-iframe" class="hud-visualizer-iframe" title="Alternate map visualizer" hidden></iframe>
+    </div>
 
     <div class="hud-bar hud-title">
       <span class="minecraft-green">MATHOX1MINEZ</span>
@@ -236,6 +276,8 @@ import Analytics from '@vercel/analytics/astro'
       <button id="zoom-in" class="hud-button" aria-label="Zoom in">+</button>
       <button id="toggle-list" class="hud-button active" aria-label="Toggle POI list">List</button>
       <button id="toggle-filter" class="hud-button active" aria-label="Toggle filters">Filter</button>
+      <button id="toggle-percent" class="hud-button" aria-label="Toggle percent-dug overlay">Percent (beta)</button>
+      <select id="visualizer-select" class="hud-select" aria-label="Choose map visualizer"></select>
     </div>
 
     <div id="poi-list" class="hud-panel hud-list">

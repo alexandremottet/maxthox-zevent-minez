@@ -1,7 +1,7 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "@south-paw/typeface-minecraft";
-import { renderPois, fromLatLng, isZone, setupMapImage, mapQuadrants } from "map-render";
+import { renderPois, fromLatLng, isZone, setupMapImage, mapQuadrants, VISUALIZERS, DEFAULT_VISUALIZER_ID } from "map-render";
 import { authClient } from "../lib/auth-client.ts";
 import type { AdminPoi } from "../lib/poi-db.ts";
 
@@ -336,3 +336,71 @@ for (const entry of listEntries) {
   item.addEventListener("click", () => map.flyTo(entry.center, FLY_TO_ZOOM));
   poiListItems.append(item);
 }
+
+// --- visualizer picker ---
+
+const VISUALIZER_STORAGE_KEY = "voxelmap-visualizer";
+
+function loadSavedVisualizerId(): string {
+  try {
+    return localStorage.getItem(VISUALIZER_STORAGE_KEY) ?? DEFAULT_VISUALIZER_ID;
+  } catch {
+    return DEFAULT_VISUALIZER_ID;
+  }
+}
+
+function saveVisualizerId(id: string): void {
+  try {
+    localStorage.setItem(VISUALIZER_STORAGE_KEY, id);
+  } catch {
+    // ignore — nothing to persist to if storage is unavailable
+  }
+}
+
+const visualizerSelect = document.getElementById("visualizer-select") as HTMLSelectElement;
+const visualizerPlaceholder = document.getElementById("visualizer-placeholder") as HTMLElement;
+const visualizerPlaceholderLabel = document.getElementById("visualizer-placeholder-label") as HTMLElement;
+const visualizerIframe = document.getElementById("visualizer-iframe") as HTMLIFrameElement;
+
+for (const visualizer of VISUALIZERS) {
+  const option = document.createElement("option");
+  option.value = visualizer.id;
+  option.textContent = visualizer.label;
+  visualizerSelect.append(option);
+}
+
+// registered visualizers with a real implementation here; anything else in
+// VISUALIZERS falls back to a "coming soon" placeholder below
+const VISUALIZER_IFRAME_SRC: Record<string, string> = {
+  bluemap: "/bluemap/index.html",
+};
+
+function applyVisualizer(id: string): void {
+  const visualizer = VISUALIZERS.find((entry) => entry.id === id) ?? VISUALIZERS[0];
+  const iframeSrc = VISUALIZER_IFRAME_SRC[visualizer.id];
+
+  if (visualizer.id === "leaflet") {
+    visualizerPlaceholder.hidden = true;
+    visualizerIframe.hidden = true;
+    visualizerIframe.src = "";
+  } else if (iframeSrc) {
+    visualizerPlaceholderLabel.hidden = true;
+    visualizerIframe.hidden = false;
+    if (visualizerIframe.src !== new URL(iframeSrc, location.href).href) visualizerIframe.src = iframeSrc;
+    visualizerPlaceholder.hidden = false;
+  } else {
+    visualizerPlaceholderLabel.hidden = false;
+    visualizerPlaceholderLabel.textContent = `${visualizer.label} — coming soon`;
+    visualizerIframe.hidden = true;
+    visualizerPlaceholder.hidden = false;
+  }
+}
+
+const savedVisualizerId = loadSavedVisualizerId();
+visualizerSelect.value = savedVisualizerId;
+applyVisualizer(savedVisualizerId);
+
+visualizerSelect.addEventListener("change", () => {
+  saveVisualizerId(visualizerSelect.value);
+  applyVisualizer(visualizerSelect.value);
+});

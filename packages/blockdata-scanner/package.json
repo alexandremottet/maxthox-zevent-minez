@@ -1,0 +1,17 @@
+{
+  "name": "blockdata-scanner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "scan": "tsx src/index.ts --input ../voxelmap-to-image/save/minez.mathox1subs.fr/dimensions/minecraft/overworld/region --output ../map-render/src/percent-data.ts --min-y -64 --max-y 20"
+  },
+  "dependencies": {
+    "prismarine-nbt": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

@@ -1,7 +1,20 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "@south-paw/typeface-minecraft";
-import { renderPois, fromLatLng, heightAt, toLatLng, setupMapImage, mapQuadrants, pois, CHUNK_LEVELS } from "map-render";
+import {
+  renderPois,
+  fromLatLng,
+  heightAt,
+  toLatLng,
+  setupMapImage,
+  mapQuadrants,
+  pois,
+  CHUNK_LEVELS,
+  VISUALIZERS,
+  DEFAULT_VISUALIZER_ID,
+  renderChunkPercents,
+  chunkPercents,
+} from "map-render";
 
 
 // permissive range so getBoundsZoom below isn't clamped to Leaflet's default 0..18
@@ -114,7 +127,7 @@ const filterPanel = document.getElementById("filter-panel") as HTMLElement;
 const filterItems = document.getElementById("filter-items") as HTMLElement;
 const toggleFilterButton = document.getElementById("toggle-filter") as HTMLButtonElement;
 
-function addFilterItem(label: string, color: string | null, onChange: (checked: boolean) => void): void {
+function addFilterItem(label: string, color: string | null, onChange: (checked: boolean) => void): HTMLInputElement {
   const item = document.createElement("li");
   item.className = "color-filter-item";
 
@@ -140,6 +153,7 @@ function addFilterItem(label: string, color: string | null, onChange: (checked: 
     if (event.target !== checkbox) checkbox.click();
   });
   filterItems.append(item);
+  return checkbox;
 }
 
 function toggleCategory(category: string, visible: boolean): void {
@@ -149,8 +163,16 @@ function toggleCategory(category: string, visible: boolean): void {
   else map.removeLayer(group);
 }
 
+// chunk level colors and the percent overlay show the same chunks two
+// different ways — never both at once (see hidePercentOverlay/hideChunkLevels below)
+const chunkLevelCheckboxes: HTMLInputElement[] = [];
+
 for (const level of CHUNK_LEVELS) {
-  addFilterItem(`${level.name} chunk`, level.color, (checked) => toggleCategory(level.name, checked));
+  const checkbox = addFilterItem(`${level.name} chunk`, level.color, (checked) => {
+    if (checked) hidePercentOverlay();
+    toggleCategory(level.name, checked);
+  });
+  chunkLevelCheckboxes.push(checkbox);
 }
 addFilterItem("chunk label", null, setChunkLabelsVisible);
 addFilterItem("startup POI", null, (checked) => toggleCategory("startup", checked));
@@ -160,4 +182,108 @@ addFilterItem("zone POI", null, (checked) => toggleCategory("zone", checked));
 toggleFilterButton.addEventListener("click", () => {
   filterPanel.hidden = !filterPanel.hidden;
   toggleFilterButton.classList.toggle("active", !filterPanel.hidden);
+});
+
+// --- visualizer picker ---
+
+const VISUALIZER_STORAGE_KEY = "voxelmap-visualizer";
+
+function loadSavedVisualizerId(): string {
+  try {
+    return localStorage.getItem(VISUALIZER_STORAGE_KEY) ?? DEFAULT_VISUALIZER_ID;
+  } catch {
+    return DEFAULT_VISUALIZER_ID;
+  }
+}
+
+function saveVisualizerId(id: string): void {
+  try {
+    localStorage.setItem(VISUALIZER_STORAGE_KEY, id);
+  } catch {
+    // ignore — nothing to persist to if storage is unavailable
+  }
+}
+
+const visualizerSelect = document.getElementById("visualizer-select") as HTMLSelectElement;
+const visualizerPlaceholder = document.getElementById("visualizer-placeholder") as HTMLElement;
+const visualizerPlaceholderLabel = document.getElementById("visualizer-placeholder-label") as HTMLElement;
+const visualizerIframe = document.getElementById("visualizer-iframe") as HTMLIFrameElement;
+
+for (const visualizer of VISUALIZERS) {
+  const option = document.createElement("option");
+  option.value = visualizer.id;
+  option.textContent = visualizer.label;
+  visualizerSelect.append(option);
+}
+
+// registered visualizers with a real implementation here; anything else in
+// VISUALIZERS falls back to a "coming soon" placeholder below
+const VISUALIZER_IFRAME_SRC: Record<string, string> = {
+  bluemap: "/bluemap/index.html",
+};
+
+function applyVisualizer(id: string): void {
+  const visualizer = VISUALIZERS.find((entry) => entry.id === id) ?? VISUALIZERS[0];
+  const iframeSrc = VISUALIZER_IFRAME_SRC[visualizer.id];
+
+  if (visualizer.id === "leaflet") {
+    visualizerPlaceholder.hidden = true;
+    visualizerIframe.hidden = true;
+    visualizerIframe.src = "";
+  } else if (iframeSrc) {
+    visualizerPlaceholderLabel.hidden = true;
+    visualizerIframe.hidden = false;
+    if (visualizerIframe.src !== new URL(iframeSrc, location.href).href) visualizerIframe.src = iframeSrc;
+    visualizerPlaceholder.hidden = false;
+  } else {
+    visualizerPlaceholderLabel.hidden = false;
+    visualizerPlaceholderLabel.textContent = `${visualizer.label} — coming soon`;
+    visualizerIframe.hidden = true;
+    visualizerPlaceholder.hidden = false;
+  }
+}
+
+const savedVisualizerId = loadSavedVisualizerId();
+visualizerSelect.value = savedVisualizerId;
+applyVisualizer(savedVisualizerId);
+
+visualizerSelect.addEventListener("change", () => {
+  saveVisualizerId(visualizerSelect.value);
+  applyVisualizer(visualizerSelect.value);
+});
+
+// --- percent-dug overlay (beta) ---
+// a fully separate rendering path from renderPois/categoryGroups above, kept
+// mutually exclusive with the chunk-level colors (see chunkLevelCheckboxes
+// above) — the two color the same chunks two different ways, so showing both
+// at once just overlaps them
+
+const percentGroup = renderChunkPercents(map, chunkPercents);
+const togglePercentButton = document.getElementById("toggle-percent") as HTMLButtonElement;
+
+function hidePercentOverlay(): void {
+  if (map.hasLayer(percentGroup)) {
+    map.removeLayer(percentGroup);
+    togglePercentButton.classList.remove("active");
+  }
+}
+
+function hideChunkLevels(): void {
+  for (const checkbox of chunkLevelCheckboxes) {
+    if (checkbox.checked) {
+      checkbox.checked = false;
+      checkbox.dispatchEvent(new Event("change"));
+    }
+  }
+}
+
+togglePercentButton.addEventListener("click", () => {
+  const visible = !map.hasLayer(percentGroup);
+  if (visible) {
+    hideChunkLevels();
+    percentGroup.addTo(map);
+  } else {
+    map.removeLayer(percentGroup);
+  }
+  togglePercentButton.classList.toggle("active", visible);
 });

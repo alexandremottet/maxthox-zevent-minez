@@ -15,7 +15,14 @@ import { MongoClient, type Document } from "mongodb";
 // compile time, no runtime import) — real values (levels.json) are read
 // straight off disk below instead, bypassing that barrel entirely
 import type { PointOfInterest, PointPointOfInterest } from "map-render";
-import { HEIGHTPOS, NO_DATA_HEIGHT, REGION_SIZE, listRegionFiles, loadRegion, shortPlane } from "voxelmap-to-image";
+import { BLOCKSTATEPOS, HEIGHTPOS, NO_DATA_HEIGHT, REGION_SIZE, listRegionFiles, loadRegion, shortPlane } from "voxelmap-to-image";
+
+// VoxelMap sometimes caches a column as height=-64 (world floor) with the
+// recorded surface block still "air" — never real terrain (a genuine surface
+// reading is never air), just a not-yet-scanned placeholder that happens to
+// slip past the NO_DATA_HEIGHT check. Left in, it drags never-visited chunks'
+// average height down into "done" purely by landing on the world floor.
+const AIR_BLOCK_NAME = /:(air|cave_air|void_air)\}$/;
 
 // one Minecraft chunk = 16x16 blocks
 const CHUNK_SIZE = 16;
@@ -55,6 +62,7 @@ function findDugChunks(inputDir: string, levels: ChunkLevel[]): ScannedChunk[] {
   for (const file of files) {
     const region = loadRegion(file.path);
     const heights = shortPlane(region.data, HEIGHTPOS, true);
+    const blockstates = shortPlane(region.data, BLOCKSTATEPOS, false);
 
     for (let chunkRow = 0; chunkRow < CHUNKS_PER_REGION_SIDE; chunkRow++) {
       for (let chunkCol = 0; chunkCol < CHUNKS_PER_REGION_SIDE; chunkCol++) {
@@ -64,8 +72,11 @@ function findDugChunks(inputDir: string, levels: ChunkLevel[]): ScannedChunk[] {
           for (let dx = 0; dx < CHUNK_SIZE; dx++) {
             const localX = chunkCol * CHUNK_SIZE + dx;
             const localZ = chunkRow * CHUNK_SIZE + dz;
-            const height = heights[localZ * REGION_SIZE + localX];
+            const index = localZ * REGION_SIZE + localX;
+            const height = heights[index];
             if (height === NO_DATA_HEIGHT) continue;
+            const blockName = region.key.get(blockstates[index]) ?? "";
+            if (AIR_BLOCK_NAME.test(blockName)) continue;
             surveyed++;
             heightSum += height;
           }
@@ -135,9 +146,18 @@ async function main(): Promise<void> {
     }
   }
 
+  // remove chunk POIs from a previous scan that no longer match any currently
+  // dug chunk — e.g. ones misclassified by a since-fixed bug in findDugChunks
+  const stalePois = existingChunkPois.filter(
+    (poi: Document) => !dugChunks.some(({ worldX, worldZ }) => isSameChunk(poi as unknown as PointOfInterest, worldX, worldZ)),
+  );
+  if (stalePois.length > 0) {
+    await collection.deleteMany({ _id: { $in: stalePois.map((poi: Document) => poi._id) } });
+  }
+
   await client.close();
   const alreadyExact = dugChunks.length - created - corrected;
-  console.log(`${created} created, ${corrected} corrected, ${alreadyExact} already exact`);
+  console.log(`${created} created, ${corrected} corrected, ${alreadyExact} already exact, ${stalePois.length} removed as stale`);
 }
 
 main().catch((error) => {
