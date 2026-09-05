@@ -3,6 +3,7 @@ import "leaflet/dist/leaflet.css";
 import "@south-paw/typeface-minecraft";
 import { renderPois, fromLatLng, toLatLng, setupMapImage, mapQuadrants, pois } from "map-render";
 
+
 // permissive range so getBoundsZoom below isn't clamped to Leaflet's default 0..18
 // zoomAnimation off: the quadrant images are huge single <img> elements, and
 // animating the zoom means the browser rescales them every frame — jumping
