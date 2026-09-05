@@ -44,8 +44,8 @@ export const pois: PointOfInterest[] = [
   },
   {
     "type": "chunk",
-    "x": 16,
-    "y": 16
+    "x": 34,
+    "y": 17
   },
   {
     "type": "chunk",
@@ -99,7 +99,7 @@ export const pois: PointOfInterest[] = [
   },
   {
     "type": "chunk",
-    "x": 33,
+    "x": 32,
     "y": -16
   },
   {
@@ -117,33 +117,6 @@ export const pois: PointOfInterest[] = [
     "color": "green"
   },
   {
-    "title": "Stock Pomme de Terre Village",
-    "description": "Un stack à la fois.",
-    "x": 315,
-    "y": 82,
-    "color": "green"
-  },
-  {
-    "title": "Ferme XP Village",
-    "description": "On fais attention quand on tape les stands et on en remet un si il casse.",
-    "x": 315,
-    "y": 93,
-    "color": "green"
-  },
-  {
-    "title": "Foret bois village",
-    "color": "green",
-    "x": 218,
-    "y": 34
-  },
-  {
-    "title": "Fer pour beacon",
-    "description": "Ne rien prendre, c'est pour les beacon.",
-    "x": 7,
-    "y": 65,
-    "color": "red"
-  },
-  {
     "title": "Outils pour démarrer",
     "color": "white",
     "type": "startup",
@@ -159,9 +132,9 @@ export const pois: PointOfInterest[] = [
   },
   {
     "title": "Stock à Bonemeal",
+    "color": "white",
     "x": 31,
-    "y": -9,
-    "color": "blue"
+    "y": -9
   },
   {
     "title": "Spawn",
