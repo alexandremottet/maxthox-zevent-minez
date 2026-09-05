@@ -95,7 +95,8 @@ jobs:
       - name: Link Vercel project
         run: |
           mkdir -p .vercel
-          printf '{"projectId":"%s","orgId":"%s"}' "${{ secrets.VERCEL_PROJECT_ID }}" "${{ secrets.VERCEL_ORG_ID }}" > .vercel/project.json
+          printf '{"projectId":"%s","orgId":"%s","projectName":"voxelmap-admin"}' "${{ secrets.VERCEL_PROJECT_ID }}" "${{ secrets.VERCEL_ORG_ID }}" > .vercel/project.json
+          cat .vercel/project.json
 
       # GitHub secrets are the source of truth; sync them to Vercel's persistent
       # project env vars (not deploy-time --env flags, which don't reliably
