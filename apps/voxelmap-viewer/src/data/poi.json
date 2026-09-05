@@ -7,6 +7,41 @@
   },
   {
     "type": "chunk",
+    "x": -16,
+    "y": -80
+  },
+  {
+    "type": "chunk",
+    "x": -16,
+    "y": -64
+  },
+  {
+    "type": "chunk",
+    "x": -16,
+    "y": -48
+  },
+  {
+    "type": "chunk",
+    "x": 0,
+    "y": -32
+  },
+  {
+    "type": "chunk",
+    "x": 0,
+    "y": -16
+  },
+  {
+    "type": "chunk",
+    "x": 16,
+    "y": -16
+  },
+  {
+    "type": "chunk",
+    "x": 16,
+    "y": 0
+  },
+  {
+    "type": "chunk",
     "x": 16,
     "y": 32
   },
@@ -61,6 +96,12 @@
     "title": "Ferme à Bonemeal",
     "x": 5,
     "y": 4,
+    "color": "blue"
+  },
+  {
+    "title": "Stock à Bonemeal",
+    "x": 24,
+    "y": -13,
     "color": "blue"
   },
   {
