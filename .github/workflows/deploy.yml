@@ -37,6 +37,11 @@ jobs:
       - name: Embed map into the shared map-render package
         run: pnpm --filter map-render run generate-map
 
+      - name: Fetch POIs from the database
+        run: pnpm --filter map-render run fetch-pois
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+
       - name: Build Astro app
         run: pnpm --filter voxelmap-viewer run build
 

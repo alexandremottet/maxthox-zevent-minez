@@ -166,13 +166,13 @@ form.addEventListener("submit", async (event) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(poi),
     });
-    const data = (await response.json()) as { error?: string; commitUrl?: string };
+    const data = (await response.json()) as { error?: string; ok?: boolean };
     if (!response.ok) {
       statusEl.textContent = data.error ?? "failed to publish";
       statusEl.className = "dialog-status error";
       return;
     }
-    statusEl.textContent = "published — the viewer will rebuild shortly.";
+    statusEl.textContent = "saved — rebuild triggered, the viewer will update shortly.";
     statusEl.className = "dialog-status success";
     setTimeout(() => window.location.reload(), 1200);
   } catch (error) {

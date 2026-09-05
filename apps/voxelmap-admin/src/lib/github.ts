@@ -1,50 +1,22 @@
-import type { PointOfInterest } from "map-render";
+import { requireEnv } from "./env.ts";
 
-const GITHUB_API = "https://api.github.com";
-const POI_PATH = "apps/voxelmap-viewer/src/data/poi.json";
+// POIs live in MongoDB now (see poi-db.ts); the viewer fetches them at build
+// time (packages/map-render/scripts/fetch-pois.mjs), so publishing a new POI
+// just needs to re-run that build — no file to commit
+export async function triggerDeploy(): Promise<void> {
+  const repo = requireEnv("GITHUB_REPO");
+  const token = requireEnv("GITHUB_TOKEN");
 
-function headers(): HeadersInit {
-  return {
-    Authorization: `Bearer ${import.meta.env.GITHUB_TOKEN}`,
-    Accept: "application/vnd.github+json",
-  };
-}
-
-export interface PoiFile {
-  pois: PointOfInterest[];
-  sha: string;
-}
-
-export async function getPoiFile(): Promise<PoiFile> {
-  const repo = import.meta.env.GITHUB_REPO;
-  const res = await fetch(`${GITHUB_API}/repos/${repo}/contents/${POI_PATH}`, { headers: headers() });
-  if (!res.ok) {
-    throw new Error(`GitHub API error fetching poi.json: ${res.status} ${await res.text()}`);
-  }
-  const data = (await res.json()) as { content: string; sha: string };
-  const pois = JSON.parse(Buffer.from(data.content, "base64").toString("utf-8")) as PointOfInterest[];
-  return { pois, sha: data.sha };
-}
-
-export async function addPoi(poi: PointOfInterest): Promise<{ commitUrl: string }> {
-  const repo = import.meta.env.GITHUB_REPO;
-  const { pois, sha } = await getPoiFile();
-  const updated = [...pois, poi];
-  const content = Buffer.from(JSON.stringify(updated, null, 2) + "\n", "utf-8").toString("base64");
-
-  const res = await fetch(`${GITHUB_API}/repos/${repo}/contents/${POI_PATH}`, {
-    method: "PUT",
-    headers: headers(),
-    body: JSON.stringify({
-      message: `poi: add "${poi.title ?? "untitled"}"`,
-      content,
-      sha,
-      branch: "main",
-    }),
+  const res = await fetch(`https://api.github.com/repos/${repo}/actions/workflows/deploy.yml/dispatches`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/vnd.github+json",
+    },
+    body: JSON.stringify({ ref: "main" }),
   });
+
   if (!res.ok) {
-    throw new Error(`GitHub API error updating poi.json: ${res.status} ${await res.text()}`);
+    throw new Error(`GitHub API error triggering deploy: ${res.status} ${await res.text()}`);
   }
-  const data = (await res.json()) as { commit: { html_url: string } };
-  return { commitUrl: data.commit.html_url };
 }

@@ -1,18 +1,7 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
-import { MongoClient } from "mongodb";
-
-function requireEnv(name: keyof ImportMetaEnv): string {
-  const value = import.meta.env[name];
-  if (!value) {
-    throw new Error(
-      `missing required env var: ${name}. See apps/voxelmap-admin/README.md for local dev setup.`,
-    );
-  }
-  return value;
-}
-
-const mongoClient = new MongoClient(requireEnv("MONGODB_URI"));
+import { requireEnv } from "./env.ts";
+import { mongoClient } from "./mongo.ts";
 
 export const auth = betterAuth({
   database: mongodbAdapter(mongoClient.db()),

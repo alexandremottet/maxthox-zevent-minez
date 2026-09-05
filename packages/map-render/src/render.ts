@@ -170,11 +170,12 @@ export interface RenderResult {
 export interface RenderOptions {
   mapHeight: number;
   defaultColor?: string;
+  iconSize?: L.PointTuple;
 }
 
 export function renderPois(map: L.Map, pois: PointOfInterest[], options: RenderOptions): RenderResult {
-  const { mapHeight, defaultColor = DEFAULT_POI_COLOR } = options;
-  const poiIcon = L.divIcon({ className: "poi-marker-icon", iconSize: [12, 12] });
+  const { mapHeight, defaultColor = DEFAULT_POI_COLOR, iconSize = [12, 12] } = options;
+  const poiIcon = L.divIcon({ className: "poi-marker-icon", iconSize });
 
   // one LayerGroup per POI color, so a color filter panel can show/hide a
   // whole color's worth of markers/zones at once
@@ -212,7 +213,9 @@ export function renderPois(map: L.Map, pois: PointOfInterest[], options: RenderO
       center = toLatLng(mapHeight, poi.x, poi.y);
       const marker = L.marker(center, { icon: poiIcon }).addTo(group);
       if (popupContent) marker.bindPopup(popupContent);
-      marker.getElement()?.style.setProperty("border-color", color);
+      const el = marker.getElement();
+      el?.style.setProperty("border-color", color);
+      el?.style.setProperty("--poi-color", color);
     }
 
     if (poi.title) {

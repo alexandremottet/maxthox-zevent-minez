@@ -6,10 +6,12 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {
-    "generate-map": "node scripts/embed-map.mjs"
+    "generate-map": "node scripts/embed-map.mjs",
+    "fetch-pois": "node scripts/fetch-pois.mjs"
   },
   "dependencies": {
-    "leaflet": "^1.9.4"
+    "leaflet": "^1.9.4",
+    "mongodb": "^7.6.0"
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.22",

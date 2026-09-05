@@ -1,8 +1,7 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "@south-paw/typeface-minecraft";
-import { renderPois, mapDataUrl, mapHeight, mapWidth } from "map-render";
-import { pois } from "../data/poi.ts";
+import { renderPois, mapDataUrl, mapHeight, mapWidth, pois } from "map-render";
 
 // permissive range so getBoundsZoom below isn't clamped to Leaflet's default 0..18
 const map = L.map("map", { crs: L.CRS.Simple, minZoom: -20, maxZoom: 20, zoomControl: false });
@@ -36,7 +35,7 @@ function updateZoomButtons() {
 map.on("zoomend", updateZoomButtons);
 updateZoomButtons();
 
-const { colorGroups, listEntries } = renderPois(map, pois, { mapHeight });
+const { colorGroups, listEntries } = renderPois(map, pois, { mapHeight, iconSize: [32, 32] });
 
 // --- POI list panel ---
 

@@ -1,11 +1,11 @@
 ---
-import { getPoiFile } from "../lib/github.ts";
+import { listPois } from "../lib/poi-db.ts";
 
 if (!Astro.locals.session) {
   return Astro.redirect("/login");
 }
 
-const { pois } = await getPoiFile();
+const pois = await listPois();
 ---
 <html lang="en">
   <head>

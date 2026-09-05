@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import type { PointOfInterest } from "map-render";
-import { addPoi } from "../../lib/github.ts";
+import { addPoi } from "../../lib/poi-db.ts";
+import { triggerDeploy } from "../../lib/github.ts";
 
 function isValidPoi(body: unknown): body is PointOfInterest {
   if (typeof body !== "object" || body === null) return false;
@@ -37,8 +38,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }
 
   try {
-    const { commitUrl } = await addPoi(body);
-    return new Response(JSON.stringify({ commitUrl }), {
+    await addPoi(body);
+    await triggerDeploy();
+    return new Response(JSON.stringify({ ok: true }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
