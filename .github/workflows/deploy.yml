@@ -88,27 +88,29 @@ jobs:
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
 
-      # `vercel deploy` accepts VERCEL_ORG_ID/VERCEL_PROJECT_ID env vars directly,
-      # but `vercel env` doesn't — it only reads a local .vercel/project.json link
-      # file, which a fresh CI checkout never has. Write it explicitly so both
-      # this step and the deploy step below resolve the same linked project.
-      - name: Link Vercel project
-        run: |
-          mkdir -p .vercel
-          printf '{"projectId":"%s","orgId":"%s","projectName":"voxelmap-admin"}' "${{ secrets.VERCEL_PROJECT_ID }}" "${{ secrets.VERCEL_ORG_ID }}" > .vercel/project.json
-          cat .vercel/project.json
-
       # GitHub secrets are the source of truth; sync them to Vercel's persistent
-      # project env vars (not deploy-time --env flags, which don't reliably
-      # survive Vercel reusing a build cache across deployments) so the deployed
-      # function always has what requireEnv() expects on every request.
+      # project env vars so the deployed function always has what requireEnv()
+      # expects on every request. Uses the REST API directly, not `vercel env add`
+      # — that CLI command silently stores an EMPTY value when fed via a piped
+      # stdin in this non-interactive context (verified: the API shows
+      # `"value": ""` afterwards despite the CLI reporting success).
       - name: Sync env vars to Vercel
         run: |
           sync_env() {
             name="$1"
             value="$2"
-            pnpm dlx vercel@latest env rm "$name" production --yes --token="${{ secrets.VERCEL_TOKEN }}" >/dev/null 2>&1 || true
-            printf '%s' "$value" | pnpm dlx vercel@latest env add "$name" production --token="${{ secrets.VERCEL_TOKEN }}"
+            existing_id=$(curl -s -H "Authorization: Bearer $VERCEL_TOKEN" \
+              "https://api.vercel.com/v10/projects/$VERCEL_PROJECT_ID/env?teamId=$VERCEL_ORG_ID" \
+              | jq -r --arg k "$name" '.envs[] | select(.key==$k) | .id' | head -1)
+            if [ -n "$existing_id" ]; then
+              curl -s -X DELETE -H "Authorization: Bearer $VERCEL_TOKEN" \
+                "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID/env/$existing_id?teamId=$VERCEL_ORG_ID" > /dev/null
+            fi
+            curl -s -X POST "https://api.vercel.com/v10/projects/$VERCEL_PROJECT_ID/env?teamId=$VERCEL_ORG_ID" \
+              -H "Authorization: Bearer $VERCEL_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d "$(jq -n --arg k "$name" --arg v "$value" '{key:$k, value:$v, type:"encrypted", target:["production"]}')" \
+              | jq -e '.key' > /dev/null
           }
           sync_env MONGODB_URI "${{ secrets.MONGODB_URI }}"
           sync_env BETTER_AUTH_SECRET "${{ secrets.BETTER_AUTH_SECRET }}"
@@ -116,6 +118,7 @@ jobs:
           sync_env GITHUB_TOKEN "${{ secrets.ADMIN_GITHUB_TOKEN }}"
           sync_env GITHUB_REPO "alexandremottet/maxthox-zevent-minez"
         env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
@@ -127,4 +130,4 @@ jobs:
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: pnpm dlx vercel@latest deploy --prod --yes --token="${{ secrets.VERCEL_TOKEN }}"
+        run: pnpm dlx vercel@latest deploy --prod --yes --force --token="${{ secrets.VERCEL_TOKEN }}"
