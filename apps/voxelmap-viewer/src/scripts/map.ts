@@ -55,6 +55,7 @@ function createPopupContent(title: string, description?: string): HTMLElement {
   return container;
 }
 
+const DEFAULT_POI_COLOR = "red";
 const poiIcon = L.divIcon({ className: "poi-marker-icon", iconSize: [12, 12] });
 
 // poi.json coordinates are Minecraft world x/z; world (0, 0) sits at this
@@ -121,9 +122,10 @@ function ensureShineGradient(): void {
 
 for (const poi of pois) {
   const popupContent = createPopupContent(poi.title, poi.description);
+  const color = poi.color ?? DEFAULT_POI_COLOR;
   if (isZone(poi)) {
     L.rectangle([toLatLng(poi.x1, poi.y1), toLatLng(poi.x2, poi.y2)], {
-      color: "#f00",
+      color,
       weight: 2,
       fillColor: `url(#${SHINE_GRADIENT_ID})`,
       fillOpacity: 1,
@@ -132,6 +134,7 @@ for (const poi of pois) {
       .addTo(map);
     ensureShineGradient();
   } else {
-    L.marker(toLatLng(poi.x, poi.y), { icon: poiIcon }).bindPopup(popupContent).addTo(map);
+    const marker = L.marker(toLatLng(poi.x, poi.y), { icon: poiIcon }).bindPopup(popupContent).addTo(map);
+    marker.getElement()?.style.setProperty("border-color", color);
   }
 }

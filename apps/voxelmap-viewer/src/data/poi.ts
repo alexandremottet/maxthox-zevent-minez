@@ -3,6 +3,8 @@ import poiData from "./poi.json";
 interface PointOfInterestBase {
   title: string;
   description?: string;
+  /** any CSS color, e.g. "red", "blue", "#3498db". Defaults to red. */
+  color?: string;
 }
 
 export interface PointPointOfInterest extends PointOfInterestBase {
