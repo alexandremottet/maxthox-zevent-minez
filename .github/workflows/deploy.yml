@@ -60,3 +60,49 @@ jobs:
     steps:
       - uses: actions/deploy-pages@v4
         id: deployment
+
+  deploy-admin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Generate map image from VoxelMap data
+        run: pnpm --filter voxelmap-to-image run map
+
+      - name: Embed map into the shared map-render package
+        run: pnpm --filter map-render run generate-map
+
+      - name: Fetch POIs from the database
+        run: pnpm --filter map-render run fetch-pois
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+
+      # Root Directory (apps/voxelmap-admin) is configured on the Vercel project
+      # itself, so this uploads the whole checked-out workspace (pnpm-lock.yaml,
+      # the map-render package, and the just-refreshed map/POI data included) and
+      # Vercel builds inside that subdirectory. -e/--env sets the deployed
+      # function's runtime env vars — this app reads them via requireEnv() on
+      # every request, so they must be present on the deployment itself.
+      - name: Deploy admin to Vercel
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          pnpm dlx vercel@latest deploy --prod --yes \
+            --token="${{ secrets.VERCEL_TOKEN }}" \
+            --env MONGODB_URI="${{ secrets.MONGODB_URI }}" \
+            --env BETTER_AUTH_SECRET="${{ secrets.BETTER_AUTH_SECRET }}" \
+            --env BETTER_AUTH_URL="${{ secrets.BETTER_AUTH_URL }}" \
+            --env GITHUB_TOKEN="${{ secrets.ADMIN_GITHUB_TOKEN }}" \
+            --env GITHUB_REPO="alexandremottet/maxthox-zevent-minez"
