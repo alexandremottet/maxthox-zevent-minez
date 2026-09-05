@@ -51,6 +51,26 @@
     "y": 16
   },
   {
+    "type": "chunk",
+    "x": 16,
+    "y": -32
+  },
+  {
+    "type": "chunk",
+    "x": 32,
+    "y": -32
+  },
+  {
+    "type": "chunk",
+    "x": 48,
+    "y": -32
+  },
+  {
+    "type": "chunk",
+    "x": 65,
+    "y": -32
+  },
+  {
     "title": "Farm à PDT",
     "description": "On n'en récolte un peu pour les autres et on replante.",
     "x1": 323,
