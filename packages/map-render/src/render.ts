@@ -246,13 +246,19 @@ export function renderPois<T extends PointOfInterest>(
   const {
     mapHeight,
     defaultColor = DEFAULT_POI_COLOR,
-    iconSize = [4, 4],
-    startupIconSize = [8, 8],
+    iconSize = [15, 15],
+    startupIconSize = [20,20],
     onClick,
     onMove,
   } = options;
   const poiIcon = L.divIcon({ className: "poi-marker-icon", iconSize });
   const startupIcon = L.divIcon({ className: "poi-marker-icon", iconSize: startupIconSize });
+
+  // iconSize/startupIconSize are CSS pixels at the current zoom; markers should
+  // scale with the map like the chunk/zone rectangles do, so track each marker's
+  // base size and rescale on zoom (CRS.Simple: 1 world unit = 2^zoom screen px)
+  const referenceZoom = map.getZoom();
+  const scaledMarkers: { marker: L.Marker; baseSize: L.PointTuple; color: string }[] = [];
 
   // one LayerGroup per POI color, so a color filter panel can show/hide a
   // whole color's worth of markers/zones at once
@@ -342,11 +348,25 @@ export function renderPois<T extends PointOfInterest>(
       const el = marker.getElement();
       el?.style.setProperty("border-color", color);
       el?.style.setProperty("--poi-color", color);
+      scaledMarkers.push({ marker, baseSize: poi.type === "startup" ? startupIconSize : iconSize, color });
     }
 
     if (poi.title) {
       listEntries.push({ title: poi.title, color, center });
     }
+  }
+
+  if (scaledMarkers.length > 0) {
+    map.on("zoomend", () => {
+      const factor = 2 ** (map.getZoom() - referenceZoom);
+      for (const { marker, baseSize, color } of scaledMarkers) {
+        const scaledSize: L.PointTuple = [baseSize[0] * factor, baseSize[1] * factor];
+        marker.setIcon(L.divIcon({ className: "poi-marker-icon", iconSize: scaledSize }));
+        const el = marker.getElement();
+        el?.style.setProperty("border-color", color);
+        el?.style.setProperty("--poi-color", color);
+      }
+    });
   }
 
   return { colorGroups, listEntries };
