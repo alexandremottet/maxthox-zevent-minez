@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "pnpm --filter map-render run fetch-pois && astro dev",
     "build": "astro build",
     "preview": "astro preview"
   },

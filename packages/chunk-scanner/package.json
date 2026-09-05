@@ -1,0 +1,19 @@
+{
+  "name": "chunk-scanner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "scan": "tsx --env-file-if-exists=.env.local src/index.ts --input ../voxelmap-to-image/data/overworld"
+  },
+  "dependencies": {
+    "map-render": "workspace:*",
+    "mongodb": "^7.6.0",
+    "voxelmap-to-image": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

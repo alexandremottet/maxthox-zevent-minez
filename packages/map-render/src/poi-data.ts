@@ -9,33 +9,8 @@ export const pois: PointOfInterest[] = [
   },
   {
     "type": "chunk",
-    "x": -16,
-    "y": -64
-  },
-  {
-    "type": "chunk",
-    "x": -16,
-    "y": -48
-  },
-  {
-    "type": "chunk",
-    "x": 0,
-    "y": -32
-  },
-  {
-    "type": "chunk",
-    "x": 0,
-    "y": -16
-  },
-  {
-    "type": "chunk",
     "x": 16,
     "y": -16
-  },
-  {
-    "type": "chunk",
-    "x": 16,
-    "y": 0
   },
   {
     "type": "chunk",
@@ -45,67 +20,16 @@ export const pois: PointOfInterest[] = [
   {
     "type": "chunk",
     "x": 32,
-    "y": 0
-  },
-  {
-    "type": "chunk",
-    "x": 16,
     "y": -32
   },
   {
     "type": "chunk",
-    "x": 32,
-    "y": -32
-  },
-  {
-    "type": "chunk",
-    "x": 48,
-    "y": -32
-  },
-  {
-    "type": "chunk",
-    "x": 65,
-    "y": -32
-  },
-  {
-    "type": "chunk",
-    "x": 65,
-    "y": -48
-  },
-  {
-    "type": "chunk",
-    "x": 65,
+    "x": 64,
     "y": -64
   },
   {
     "type": "chunk",
-    "x": 65,
-    "y": -80
-  },
-  {
-    "type": "chunk",
-    "x": 65,
-    "y": -16
-  },
-  {
-    "type": "chunk",
-    "x": 65,
-    "y": 0
-  },
-  {
-    "title": "chunk",
-    "type": "chunk",
-    "x": 49,
-    "y": 0
-  },
-  {
-    "type": "chunk",
-    "x": 32,
-    "y": -16
-  },
-  {
-    "type": "chunk",
-    "x": 49,
+    "x": 48,
     "y": -16
   },
   {
@@ -125,18 +49,94 @@ export const pois: PointOfInterest[] = [
     "y": 26
   },
   {
-    "title": "Ferme à Bonemeal",
-    "color": "gray",
-    "type": "startup",
-    "x": -3,
-    "y": 12
-  },
-  {
     "title": "Stock à Bonemeal",
     "color": "gray",
     "type": "startup",
     "x": 31,
     "y": -9
+  },
+  {
+    "type": "chunk",
+    "x": 32,
+    "y": 0
+  },
+  {
+    "type": "chunk",
+    "x": 16,
+    "y": -32
+  },
+  {
+    "type": "chunk",
+    "x": 48,
+    "y": -32
+  },
+  {
+    "type": "chunk",
+    "x": 64,
+    "y": -32
+  },
+  {
+    "type": "chunk",
+    "x": 64,
+    "y": -80
+  },
+  {
+    "title": "chunk",
+    "type": "chunk",
+    "x": 48,
+    "y": 0
+  },
+  {
+    "type": "chunk",
+    "x": -16,
+    "y": -64
+  },
+  {
+    "type": "chunk",
+    "x": 64,
+    "y": -48
+  },
+  {
+    "type": "chunk",
+    "x": 64,
+    "y": -16
+  },
+  {
+    "type": "chunk",
+    "x": -16,
+    "y": -48
+  },
+  {
+    "type": "chunk",
+    "x": 0,
+    "y": -32
+  },
+  {
+    "type": "chunk",
+    "x": 0,
+    "y": -16
+  },
+  {
+    "type": "chunk",
+    "x": 16,
+    "y": 0
+  },
+  {
+    "type": "chunk",
+    "x": 64,
+    "y": 0
+  },
+  {
+    "type": "chunk",
+    "x": 32,
+    "y": -16
+  },
+  {
+    "title": "Ferme à Bonemeal",
+    "color": "gray",
+    "type": "startup",
+    "x": -3,
+    "y": 12
   },
   {
     "title": "Spawn",
@@ -410,5 +410,91 @@ export const pois: PointOfInterest[] = [
     "type": "startup",
     "x": -30,
     "y": 30
+  },
+  {
+    "title": "Lit",
+    "color": "yellow",
+    "type": "startup",
+    "x": 11,
+    "y": 11
+  },
+  {
+    "title": "Lit Village",
+    "description": "Ne pas détruire",
+    "color": "yellow",
+    "x": 320,
+    "y": 67
+  },
+  {
+    "title": "Arbre",
+    "description": "Couper et replanter",
+    "color": "green",
+    "x": -55,
+    "y": -27
+  },
+  {
+    "x": -16,
+    "y": -32,
+    "type": "chunk"
+  },
+  {
+    "x": 96,
+    "y": -128,
+    "type": "chunk"
+  },
+  {
+    "x": 48,
+    "y": -112,
+    "type": "chunk"
+  },
+  {
+    "x": 48,
+    "y": -96,
+    "type": "chunk"
+  },
+  {
+    "x": 144,
+    "y": -64,
+    "type": "chunk"
+  },
+  {
+    "x": 176,
+    "y": 80,
+    "type": "chunk"
+  },
+  {
+    "x": 0,
+    "y": 160,
+    "type": "chunk"
+  },
+  {
+    "x": 336,
+    "y": 352,
+    "type": "chunk"
+  },
+  {
+    "x": 560,
+    "y": -64,
+    "type": "chunk"
+  },
+  {
+    "x": 544,
+    "y": -48,
+    "type": "chunk"
+  },
+  {
+    "x": 560,
+    "y": -48,
+    "type": "chunk"
+  },
+  {
+    "x": 544,
+    "y": -32,
+    "type": "chunk"
+  },
+  {
+    "x": 560,
+    "y": -32,
+    "type": "chunk"
   }
 ];

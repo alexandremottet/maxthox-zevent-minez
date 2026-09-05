@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "main": "src/regions.ts",
+  "types": "src/regions.ts",
   "scripts": {
     "start": "tsx src/index.ts",
     "map": "tsx src/index.ts --input data/overworld --output out --scale 16",
