@@ -12,7 +12,7 @@ declare global {
 }
 
 // permissive range so getBoundsZoom below isn't clamped to Leaflet's default 0..18
-const map = L.map("map", { crs: L.CRS.Simple, minZoom: -20, maxZoom: 20, zoomControl: false });
+const map = L.map("map", { crs: L.CRS.Simple, minZoom: -40, maxZoom: 20, zoomControl: false });
 
 const bounds: L.LatLngBoundsExpression = [
   [0, 0],
