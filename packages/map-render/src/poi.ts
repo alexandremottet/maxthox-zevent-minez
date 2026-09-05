@@ -13,6 +13,8 @@ interface PointOfInterestBase {
    *   chunks are always shown regardless of type).
    */
   type?: "chunk" | "startup";
+  /** type:"chunk" only: name of the matching entry in levels.json — picks the cross color */
+  level?: string;
 }
 
 export interface PointPointOfInterest extends PointOfInterestBase {

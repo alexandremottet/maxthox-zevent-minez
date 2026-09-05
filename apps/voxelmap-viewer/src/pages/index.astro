@@ -177,6 +177,19 @@ import Analytics from '@vercel/analytics/astro'
         filter: drop-shadow(4px 4px 0 #000);
       }
 
+      /* plain text label showing a chunk's level, no Leaflet tooltip chrome */
+      .poi-chunk-level {
+        background: none;
+        border: none;
+        box-shadow: none;
+        font-family: "Minecraft", monospace;
+        font-size: 8px;
+        color: #fff;
+        text-shadow: 1px 1px 0 #000;
+        padding: 0;
+      }
+      .poi-chunk-level::before { display: none; }
+
       .leaflet-popup-tip-container { display: none; }
 
       .leaflet-popup-content-wrapper {
@@ -215,7 +228,7 @@ import Analytics from '@vercel/analytics/astro'
       <span class="minecraft-green">&nbsp;CHUNKS</span>
     </div>
 
-    <div id="mouse-coords" class="hud-bar hud-coords">X: -- Y: --</div>
+    <div id="mouse-coords" class="hud-bar hud-coords">X: -- Z: --</div>
 
     <div class="hud-bar hud-toolbar">
       <button id="zoom-out" class="hud-button" aria-label="Zoom out">-</button>

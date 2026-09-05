@@ -1,33 +1,44 @@
-// Scans VoxelMap region data for chunks that have been mostly dug out (a
-// mining-event challenge: most of the chunk's 256 columns bottom out near
-// bedrock) and syncs them into the "pois" MongoDB collection as type:"chunk"
-// POIs, so dug-out chunks show up on the map.
+// Scans VoxelMap region data for chunks being dug out (a mining-event
+// challenge). For each chunk, computes the average recorded height across its
+// surveyed columns and matches it against the depth bands in
+// ../map-render/src/levels.json, then syncs the result into the "pois"
+// MongoDB collection as type:"chunk" POIs, so dig progress shows up on the
+// map with the colors defined there.
 //
 //   MONGODB_URI=... tsx src/index.ts --input <dir containing x,z.zip region files>
 
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { MongoClient, type Document } from "mongodb";
 // type-only: map-render's barrel also pulls in Leaflet (browser-only), which
 // crashes in this Node CLI context, so import just the types (erased at
-// compile time, no runtime import) and keep the one stable constant local
+// compile time, no runtime import) — real values (levels.json) are read
+// straight off disk below instead, bypassing that barrel entirely
 import type { PointOfInterest, PointPointOfInterest } from "map-render";
 import { HEIGHTPOS, NO_DATA_HEIGHT, REGION_SIZE, listRegionFiles, loadRegion, shortPlane } from "voxelmap-to-image";
 
 // one Minecraft chunk = 16x16 blocks
 const CHUNK_SIZE = 16;
-
-// a column counts as "empty" once its recorded surface sits in this range —
-// around Minecraft's world floor (Y=-64 in 1.18+), meaning no real terrain
-// ever generated there (still void/bedrock-only)
-const EMPTY_HEIGHT_MIN = -65;
-const EMPTY_HEIGHT_MAX = -55;
-// a chunk is flagged once this fraction of its *surveyed* columns are empty
-// (columns VoxelMap never recorded at all are excluded, not counted as empty)
-const EMPTY_FRACTION_THRESHOLD = 0.9;
 const CHUNKS_PER_REGION_SIDE = REGION_SIZE / CHUNK_SIZE;
 
-interface EmptyChunk {
+interface ChunkLevel {
+  name: string;
+  // a chunk is assigned to whichever level's range contains the average
+  // height of its surveyed columns
+  heightMin: number;
+  heightMax: number;
+  color: string;
+}
+
+function loadLevels(): ChunkLevel[] {
+  const levelsPath = fileURLToPath(new URL("../../map-render/src/levels.json", import.meta.url));
+  return JSON.parse(readFileSync(levelsPath, "utf8"));
+}
+
+interface ScannedChunk {
   worldX: number;
   worldZ: number;
+  level: string;
 }
 
 function parseInputDir(argv: string[]): string {
@@ -37,9 +48,9 @@ function parseInputDir(argv: string[]): string {
   throw new Error("missing --input <directory containing x,z.zip region files>");
 }
 
-function findEmptyChunks(inputDir: string): EmptyChunk[] {
+function findDugChunks(inputDir: string, levels: ChunkLevel[]): ScannedChunk[] {
   const files = listRegionFiles(inputDir);
-  const empty: EmptyChunk[] = [];
+  const found: ScannedChunk[] = [];
 
   for (const file of files) {
     const region = loadRegion(file.path);
@@ -48,7 +59,7 @@ function findEmptyChunks(inputDir: string): EmptyChunk[] {
     for (let chunkRow = 0; chunkRow < CHUNKS_PER_REGION_SIDE; chunkRow++) {
       for (let chunkCol = 0; chunkCol < CHUNKS_PER_REGION_SIDE; chunkCol++) {
         let surveyed = 0;
-        let low = 0;
+        let heightSum = 0;
         for (let dz = 0; dz < CHUNK_SIZE; dz++) {
           for (let dx = 0; dx < CHUNK_SIZE; dx++) {
             const localX = chunkCol * CHUNK_SIZE + dx;
@@ -56,21 +67,25 @@ function findEmptyChunks(inputDir: string): EmptyChunk[] {
             const height = heights[localZ * REGION_SIZE + localX];
             if (height === NO_DATA_HEIGHT) continue;
             surveyed++;
-            if (height >= EMPTY_HEIGHT_MIN && height <= EMPTY_HEIGHT_MAX) low++;
+            heightSum += height;
           }
         }
         if (surveyed === 0) continue;
-        if (low / surveyed >= EMPTY_FRACTION_THRESHOLD) {
-          empty.push({
-            worldX: file.x * REGION_SIZE + chunkCol * CHUNK_SIZE,
-            worldZ: file.z * REGION_SIZE + chunkRow * CHUNK_SIZE,
-          });
-        }
+
+        const averageHeight = heightSum / surveyed;
+        const matched = levels.find((level) => averageHeight >= level.heightMin && averageHeight <= level.heightMax);
+        if (!matched) continue;
+
+        found.push({
+          worldX: file.x * REGION_SIZE + chunkCol * CHUNK_SIZE,
+          worldZ: file.z * REGION_SIZE + chunkRow * CHUNK_SIZE,
+          level: matched.name,
+        });
       }
     }
   }
 
-  return empty;
+  return found;
 }
 
 // an existing chunk POI "notes" this chunk if its recorded origin falls
@@ -87,11 +102,14 @@ async function main(): Promise<void> {
   const { MONGODB_URI } = process.env;
   if (!MONGODB_URI) throw new Error("missing required env var: MONGODB_URI");
 
+  const levels = loadLevels();
   const inputDir = parseInputDir(process.argv.slice(2));
-  const emptyChunks = findEmptyChunks(inputDir);
-  console.log(
-    `found ${emptyChunks.length} chunk(s) >= ${EMPTY_FRACTION_THRESHOLD * 100}% between y=${EMPTY_HEIGHT_MIN} and y=${EMPTY_HEIGHT_MAX}`,
-  );
+  const dugChunks = findDugChunks(inputDir, levels);
+
+  const byLevel = new Map<string, number>();
+  for (const { level } of dugChunks) byLevel.set(level, (byLevel.get(level) ?? 0) + 1);
+  const summary = levels.map((l) => `${l.name}=${byLevel.get(l.name) ?? 0}`).join(", ");
+  console.log(`found ${dugChunks.length} chunk(s): ${summary}`);
 
   const client = new MongoClient(MONGODB_URI);
   await client.connect();
@@ -101,22 +119,24 @@ async function main(): Promise<void> {
   let created = 0;
   let corrected = 0;
 
-  for (const { worldX, worldZ } of emptyChunks) {
+  for (const { worldX, worldZ, level } of dugChunks) {
     const match = existingChunkPois.find((poi: Document) => isSameChunk(poi as unknown as PointOfInterest, worldX, worldZ));
     if (match) {
-      if (match.x !== worldX || match.y !== worldZ) {
-        await collection.updateOne({ _id: match._id }, { $set: { x: worldX, y: worldZ } });
+      const needsUpdate = match.x !== worldX || match.y !== worldZ || match.level !== level;
+      if (needsUpdate) {
+        // $unset clears the old ongoing:boolean field this used to write, if present
+        await collection.updateOne({ _id: match._id }, { $set: { x: worldX, y: worldZ, level }, $unset: { ongoing: "" } });
         corrected++;
       }
     } else {
-      const poi: PointPointOfInterest = { x: worldX, y: worldZ, type: "chunk" };
+      const poi: PointPointOfInterest = { x: worldX, y: worldZ, type: "chunk", level };
       await collection.insertOne(poi);
       created++;
     }
   }
 
   await client.close();
-  const alreadyExact = emptyChunks.length - created - corrected;
+  const alreadyExact = dugChunks.length - created - corrected;
   console.log(`${created} created, ${corrected} corrected, ${alreadyExact} already exact`);
 }
 

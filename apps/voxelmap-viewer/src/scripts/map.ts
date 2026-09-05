@@ -73,7 +73,7 @@ updateZoomButtons();
 // --- chunk count ---
 
 const chunkCountValue = document.getElementById("chunk-count-value") as HTMLElement;
-chunkCountValue.textContent = String(pois.filter((poi) => poi.type === "chunk").length);
+chunkCountValue.textContent = String(pois.filter((poi) => poi.type === "chunk" && poi.level === "done").length);
 
 // --- mouse coordinates ---
 
@@ -81,7 +81,7 @@ const mouseCoords = document.getElementById("mouse-coords") as HTMLElement;
 
 map.on("mousemove", (event: L.LeafletMouseEvent) => {
   const { x, y } = fromLatLng(event.latlng.lat, event.latlng.lng);
-  mouseCoords.textContent = `X: ${Math.round(x)} Y: ${Math.round(y)}`;
+  mouseCoords.textContent = `X: ${Math.round(x)} Z: ${Math.round(y)}`;
 });
 
 const { colorGroups, listEntries } = renderPois(map, pois, {});
