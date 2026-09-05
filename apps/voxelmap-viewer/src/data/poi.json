@@ -71,6 +71,46 @@
     "y": -32
   },
   {
+    "type": "chunk",
+    "x": 65,
+    "y": -48
+  },
+  {
+    "type": "chunk",
+    "x": 65,
+    "y": -64
+  },
+  {
+    "type": "chunk",
+    "x": 65,
+    "y": -80
+  },
+  {
+    "type": "chunk",
+    "x": 65,
+    "y": -16
+  },
+  {
+    "type": "chunk",
+    "x": 65,
+    "y": 0
+  },
+  {
+    "type": "chunk",
+    "x": 49,
+    "y": 0
+  },
+  {
+    "type": "chunk",
+    "x": 33,
+    "y": -16
+  },
+  {
+    "type": "chunk",
+    "x": 49,
+    "y": -16
+  },
+  {
     "title": "Farm à PDT",
     "description": "On n'en récolte un peu pour les autres et on replante.",
     "x1": 323,

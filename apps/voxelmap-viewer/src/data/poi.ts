@@ -1,36 +1,8 @@
 import poiData from "./poi.json";
+import type { PointOfInterest } from "map-render";
 
-interface PointOfInterestBase {
-  /** omit for an unlabeled marker (no popup) */
-  title?: string;
-  description?: string;
-  /** any CSS color, e.g. "red", "blue", "#3498db". Defaults to red. */
-  color?: string;
-  /**
-   * defaults to none. "chunk" draws a red cross instead of the shine fill.
-   * On a point POI, (x, y) is treated as the chunk's origin corner and
-   * expanded to a 16x16 block zone.
-   */
-  type?: "chunk";
-}
-
-export interface PointPointOfInterest extends PointOfInterestBase {
-  x: number;
-  y: number;
-}
-
-export interface ZonePointOfInterest extends PointOfInterestBase {
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-}
-
-export type PointOfInterest = PointPointOfInterest | ZonePointOfInterest;
-
-export function isZone(poi: PointOfInterest): poi is ZonePointOfInterest {
-  return "x1" in poi;
-}
+export type { PointOfInterest, PointPointOfInterest, ZonePointOfInterest } from "map-render";
+export { isZone } from "map-render";
 
 // JSON imports widen string literal fields (e.g. "type") to plain `string`,
 // so TS can't structurally verify the union here — trusted cast instead.

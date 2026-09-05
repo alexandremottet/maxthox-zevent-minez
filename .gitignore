@@ -8,3 +8,8 @@
 node_modules
 dist
 packages/.DS_Store
+
+.env
+.env.local
+.env.*.local
+!.env.example

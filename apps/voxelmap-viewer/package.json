@@ -4,7 +4,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "generate-map": "node scripts/embed-map.mjs",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview"
@@ -12,7 +11,8 @@
   "dependencies": {
     "@south-paw/typeface-minecraft": "^1.0.0",
     "astro": "^7.3.1",
-    "leaflet": "^1.9.4"
+    "leaflet": "^1.9.4",
+    "map-render": "workspace:*"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",

@@ -34,8 +34,8 @@ jobs:
       - name: Generate map image from VoxelMap data
         run: pnpm --filter voxelmap-to-image run map
 
-      - name: Embed map into the Astro app
-        run: pnpm --filter voxelmap-viewer run generate-map
+      - name: Embed map into the shared map-render package
+        run: pnpm --filter map-render run generate-map
 
       - name: Build Astro app
         run: pnpm --filter voxelmap-viewer run build

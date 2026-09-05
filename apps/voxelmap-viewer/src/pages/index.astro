@@ -4,6 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <title>VoxelMap Viewer</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.svg">
     <style is:global>
       html, body { margin: 0; height: 100%; }
       #map { height: 100vh; width: 100vw; background: #052305; }
@@ -45,6 +46,62 @@
 
       .hud-button:hover:not(:disabled) { background: #333; }
       .hud-button:disabled { opacity: 0.4; cursor: default; }
+      .hud-button.active { background: #333; }
+
+      .hud-panel {
+        position: fixed;
+        top: 60px;
+        background: #000;
+        border: 2px solid #fff;
+        font-family: "Minecraft", monospace;
+        color: #fff;
+        z-index: 1000;
+        max-height: 60vh;
+        overflow-y: auto;
+        font-size: 13px;
+      }
+
+      .hud-panel[hidden] { display: none; }
+
+      .hud-list { right: 12px; min-width: 180px; }
+      .hud-colors { left: 12px; min-width: 160px; }
+
+      .hud-panel-title {
+        padding: 6px 10px;
+        border-bottom: 1px solid #fff;
+      }
+
+      .poi-list-items, .color-filter-items {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .poi-list-item {
+        padding: 6px 10px;
+        cursor: pointer;
+        border-bottom: 1px solid #333;
+      }
+
+      .poi-list-item:hover { background: #222; }
+
+      .color-filter-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        cursor: pointer;
+        border-bottom: 1px solid #333;
+      }
+
+      .color-filter-item:hover { background: #222; }
+
+      .color-swatch {
+        width: 12px;
+        height: 12px;
+        border: 1px solid #fff;
+        flex-shrink: 0;
+      }
 
       .poi-marker-icon {
         background: #000;
@@ -106,6 +163,18 @@
       <button id="zoom-out" class="hud-button" aria-label="Zoom out">-</button>
       <button id="zoom-fit" class="hud-button" aria-label="Fit whole map">Fit</button>
       <button id="zoom-in" class="hud-button" aria-label="Zoom in">+</button>
+      <button id="toggle-list" class="hud-button active" aria-label="Toggle POI list">List</button>
+      <button id="toggle-colors" class="hud-button" aria-label="Toggle color filters">Colors</button>
+    </div>
+
+    <div id="poi-list" class="hud-panel hud-list">
+      <div class="hud-panel-title minecraft-white">POI</div>
+      <ul id="poi-list-items" class="poi-list-items"></ul>
+    </div>
+
+    <div id="colors-panel" class="hud-panel hud-colors" hidden>
+      <div class="hud-panel-title minecraft-white">Colors</div>
+      <ul id="color-filter-items" class="color-filter-items"></ul>
     </div>
 
     <script src="../scripts/map.ts"></script>

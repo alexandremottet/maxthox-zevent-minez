@@ -1,0 +1,87 @@
+---
+if (Astro.locals.session) {
+  return Astro.redirect("/");
+}
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>VoxelMap Admin — Login</title>
+    <style is:global>
+      html, body {
+        margin: 0;
+        height: 100%;
+        background: #052305;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Minecraft", monospace;
+      }
+
+      .login-box {
+        background: #000;
+        border: 2px solid #fff;
+        padding: 20px;
+        min-width: 260px;
+        color: #fff;
+      }
+
+      .login-box h1 {
+        font-size: 18px;
+        margin: 0 0 16px;
+      }
+
+      .login-field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-bottom: 12px;
+      }
+
+      .login-field input {
+        background: #000;
+        border: 1px solid #fff;
+        color: #fff;
+        font-family: "Minecraft", monospace;
+        padding: 6px 8px;
+      }
+
+      .login-error {
+        color: #ff5555;
+        margin-bottom: 12px;
+        min-height: 1em;
+      }
+
+      .login-submit {
+        background: #000;
+        border: 1px solid #fff;
+        color: #fff;
+        font-family: "Minecraft", monospace;
+        padding: 8px 16px;
+        cursor: pointer;
+        width: 100%;
+      }
+
+      .login-submit:hover { background: #333; }
+    </style>
+  </head>
+  <body>
+    <div class="login-box">
+      <h1 class="minecraft-green">VOXELMAP ADMIN</h1>
+      <div id="login-error" class="login-error"></div>
+      <form id="login-form">
+        <div class="login-field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required autocomplete="username" />
+        </div>
+        <div class="login-field">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" required autocomplete="current-password" />
+        </div>
+        <button type="submit" class="login-submit">Login</button>
+      </form>
+    </div>
+
+    <script src="../scripts/login.ts"></script>
+  </body>
+</html>

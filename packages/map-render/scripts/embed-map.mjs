@@ -3,7 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const sourcePng = join(__dirname, "..", "..", "..", "packages", "voxelmap-to-image", "out", "map.png");
+const sourcePng = join(__dirname, "..", "..", "voxelmap-to-image", "out", "map.png");
 const outFile = join(__dirname, "..", "src", "map-data.ts");
 
 const png = readFileSync(sourcePng);

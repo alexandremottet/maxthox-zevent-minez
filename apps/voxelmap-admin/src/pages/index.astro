@@ -1,0 +1,311 @@
+---
+import { getPoiFile } from "../lib/github.ts";
+
+if (!Astro.locals.session) {
+  return Astro.redirect("/login");
+}
+
+const { pois } = await getPoiFile();
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>VoxelMap Admin</title>
+    <style is:global>
+      html, body { margin: 0; height: 100%; }
+      #map { height: 100vh; width: 100vw; background: #052305; }
+
+      .hud-bar {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #000;
+        border: 2px solid #fff;
+        font-family: "Minecraft", monospace;
+        z-index: 1000;
+      }
+
+      .hud-title {
+        top: 12px;
+        padding: 6px 16px;
+        font-size: 20px;
+        white-space: nowrap;
+      }
+
+      .hud-toolbar {
+        bottom: 12px;
+        display: flex;
+        gap: 6px;
+        padding: 6px;
+      }
+
+      .hud-button {
+        background: #000;
+        border: 1px solid #fff;
+        color: #fff;
+        font-family: "Minecraft", monospace;
+        font-size: 16px;
+        line-height: 1;
+        padding: 6px 12px;
+        cursor: pointer;
+      }
+
+      .hud-button:hover:not(:disabled) { background: #333; }
+      .hud-button:disabled { opacity: 0.4; cursor: default; }
+
+      .hud-button-green {
+        border-color: #55ff55;
+        color: #55ff55;
+      }
+
+      .hud-button-green:hover { background: #113311; }
+
+      .hud-panel {
+        position: fixed;
+        top: 60px;
+        left: 12px;
+        background: #000;
+        border: 2px solid #fff;
+        font-family: "Minecraft", monospace;
+        color: #fff;
+        z-index: 1000;
+        max-height: 70vh;
+        min-width: 200px;
+        overflow-y: auto;
+        font-size: 13px;
+      }
+
+      .hud-panel-title {
+        padding: 6px 10px;
+        border-bottom: 1px solid #fff;
+      }
+
+      .poi-list-items {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .poi-list-item {
+        padding: 6px 10px;
+        cursor: pointer;
+        border-bottom: 1px solid #333;
+      }
+
+      .poi-list-item:hover { background: #222; }
+
+      .poi-marker-icon {
+        background: #000;
+        border: 2px solid #f00;
+        border-radius: 0;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .poi-marker-icon::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(135deg, transparent 40%, rgba(85, 255, 85, 0.9) 50%, transparent 60%);
+        animation: poi-shine 2s linear infinite;
+      }
+
+      @keyframes poi-shine {
+        from { transform: translate(-100%, -100%); }
+        to { transform: translate(100%, 100%); }
+      }
+
+      .leaflet-popup-tip-container { display: none; }
+
+      .leaflet-popup-content-wrapper {
+        background: #000;
+        border: 2px solid #fff;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .leaflet-popup-content {
+        margin: 8px 10px;
+        font-family: "Minecraft", monospace;
+        font-size: 14px;
+      }
+
+      .poi-popup-desc { margin-top: 4px; }
+
+      .leaflet-popup-close-button {
+        color: #fff !important;
+        font-family: "Minecraft", monospace;
+      }
+
+      /* --- add-POI dialog: green pixelated, matches the "+" button --- */
+
+      dialog#add-poi-dialog {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin: 0;
+        background: #000;
+        border: 3px solid #55ff55;
+        border-radius: 0;
+        color: #fff;
+        font-family: "Minecraft", monospace;
+        padding: 16px;
+        min-width: 280px;
+        z-index: 2000;
+      }
+
+      dialog#add-poi-dialog h2 {
+        margin: 0 0 12px;
+        font-size: 16px;
+      }
+
+      .dialog-field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-bottom: 10px;
+      }
+
+      .dialog-field input {
+        background: #000;
+        border: 1px solid #fff;
+        color: #fff;
+        font-family: "Minecraft", monospace;
+        padding: 6px 8px;
+      }
+
+      .dialog-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .dialog-coords {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .dialog-coords[hidden] { display: none; }
+
+      .dialog-hint {
+        font-size: 11px;
+        color: #aaa;
+        margin-bottom: 10px;
+      }
+
+      .dialog-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .dialog-status {
+        min-height: 1em;
+        font-size: 12px;
+        margin-bottom: 8px;
+      }
+      .dialog-status.error { color: #ff5555; }
+      .dialog-status.success { color: #55ff55; }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <div class="hud-bar hud-title">
+      <span class="minecraft-green">VOXELMAP</span>
+      <span class="minecraft-white">&nbsp;/&nbsp;</span>
+      <span class="minecraft-green">ADMIN</span>
+    </div>
+
+    <div id="poi-list" class="hud-panel hud-list">
+      <div class="hud-panel-title minecraft-white">POI</div>
+      <ul id="poi-list-items" class="poi-list-items"></ul>
+    </div>
+
+    <div class="hud-bar hud-toolbar">
+      <button id="zoom-out" class="hud-button" aria-label="Zoom out">-</button>
+      <button id="zoom-fit" class="hud-button" aria-label="Fit whole map">Fit</button>
+      <button id="zoom-in" class="hud-button" aria-label="Zoom in">+</button>
+      <button id="add-poi" class="hud-button hud-button-green" aria-label="Add POI">+ POI</button>
+      <button id="logout" class="hud-button" aria-label="Log out">Logout</button>
+    </div>
+
+    <dialog id="add-poi-dialog">
+      <h2 class="minecraft-green">Add POI</h2>
+      <div id="dialog-status" class="dialog-status"></div>
+      <form id="add-poi-form">
+        <div class="dialog-field">
+          <label for="poi-title">Title</label>
+          <input id="poi-title" name="title" type="text" required />
+        </div>
+        <div class="dialog-field">
+          <label for="poi-description">Description</label>
+          <input id="poi-description" name="description" type="text" />
+        </div>
+        <div class="dialog-field">
+          <label for="poi-color">Color</label>
+          <input id="poi-color" name="color" type="text" placeholder="red" />
+        </div>
+        <div class="dialog-checkbox">
+          <input id="poi-chunk" name="chunk" type="checkbox" />
+          <label for="poi-chunk">Chunk (16x16, red cross)</label>
+        </div>
+        <div class="dialog-checkbox">
+          <input id="poi-zone" name="zone" type="checkbox" />
+          <label for="poi-zone">Zone (two corners instead of one point)</label>
+        </div>
+
+        <p class="dialog-hint">
+          Click the map to set coordinates — point mode fills X/Y, zone mode fills corner 1 then corner 2.
+        </p>
+
+        <div id="point-fields" class="dialog-coords">
+          <div class="dialog-field">
+            <label for="poi-x">X</label>
+            <input id="poi-x" name="x" type="number" data-coord-field="active" />
+          </div>
+          <div class="dialog-field">
+            <label for="poi-y">Y</label>
+            <input id="poi-y" name="y" type="number" />
+          </div>
+        </div>
+
+        <div id="zone-fields" class="dialog-coords" hidden>
+          <div class="dialog-field">
+            <label for="poi-x1">X1</label>
+            <input id="poi-x1" name="x1" type="number" />
+          </div>
+          <div class="dialog-field">
+            <label for="poi-y1">Y1</label>
+            <input id="poi-y1" name="y1" type="number" />
+          </div>
+          <div class="dialog-field">
+            <label for="poi-x2">X2</label>
+            <input id="poi-x2" name="x2" type="number" />
+          </div>
+          <div class="dialog-field">
+            <label for="poi-y2">Y2</label>
+            <input id="poi-y2" name="y2" type="number" />
+          </div>
+        </div>
+
+        <div class="dialog-actions">
+          <button type="button" id="dialog-cancel" class="hud-button">Cancel</button>
+          <button type="submit" class="hud-button hud-button-green">Add</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script is:inline define:vars={{ pois }}>
+      window.__initialPois = pois;
+    </script>
+    <script src="../scripts/admin.ts"></script>
+  </body>
+</html>
