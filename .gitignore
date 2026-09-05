@@ -2,5 +2,8 @@
 .gitkeep
 .DS_Store
 **/*/.DS_Store
+.astro
 
 node_modules
+dist
+packages/.DS_Store

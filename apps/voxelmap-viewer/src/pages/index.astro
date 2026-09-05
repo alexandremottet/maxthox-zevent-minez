@@ -1,0 +1,113 @@
+---
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>VoxelMap Viewer</title>
+    <style is:global>
+      html, body { margin: 0; height: 100%; }
+      #map { height: 100vh; width: 100vw; background: #052305; }
+
+      .hud-bar {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #000;
+        border: 2px solid #fff;
+        font-family: "Minecraft", monospace;
+        z-index: 1000;
+      }
+
+      .hud-title {
+        top: 12px;
+        padding: 6px 16px;
+        font-size: 20px;
+        white-space: nowrap;
+      }
+
+      .hud-toolbar {
+        bottom: 12px;
+        display: flex;
+        gap: 6px;
+        padding: 6px;
+      }
+
+      .hud-button {
+        background: #000;
+        border: 1px solid #fff;
+        color: #fff;
+        font-family: "Minecraft", monospace;
+        font-size: 16px;
+        line-height: 1;
+        padding: 6px 12px;
+        cursor: pointer;
+      }
+
+      .hud-button:hover:not(:disabled) { background: #333; }
+      .hud-button:disabled { opacity: 0.4; cursor: default; }
+
+      .poi-marker-icon {
+        background: #000;
+        border: 2px solid #f00;
+        border-radius: 0;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .poi-marker-icon::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(135deg, transparent 40%, rgba(85, 255, 85, 0.9) 50%, transparent 60%);
+        animation: poi-shine 2s linear infinite;
+      }
+
+      @keyframes poi-shine {
+        from { transform: translate(-100%, -100%); }
+        to { transform: translate(100%, 100%); }
+      }
+
+      .leaflet-popup-tip-container { display: none; }
+
+      .leaflet-popup-content-wrapper {
+        background: #000;
+        border: 2px solid #fff;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .leaflet-popup-content {
+        margin: 8px 10px;
+        font-family: "Minecraft", monospace;
+        font-size: 14px;
+      }
+
+      .poi-popup-desc { margin-top: 4px; }
+
+      .leaflet-popup-close-button {
+        color: #fff !important;
+        font-family: "Minecraft", monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <div class="hud-bar hud-title">
+      <span class="minecraft-green">MATHOX1MINEZ</span>
+      <span class="minecraft-white">&nbsp;/&nbsp;</span>
+      <span class="minecraft-green">ZEVENT 2026</span>
+    </div>
+
+    <div class="hud-bar hud-toolbar">
+      <button id="zoom-out" class="hud-button" aria-label="Zoom out">-</button>
+      <button id="zoom-fit" class="hud-button" aria-label="Fit whole map">Fit</button>
+      <button id="zoom-in" class="hud-button" aria-label="Zoom in">+</button>
+    </div>
+
+    <script src="../scripts/map.ts"></script>
+  </body>
+</html>
