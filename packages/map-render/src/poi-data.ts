@@ -44,8 +44,8 @@ export const pois: PointOfInterest[] = [
   },
   {
     "type": "chunk",
-    "x": 34,
-    "y": 17
+    "x": 49,
+    "y": -6
   },
   {
     "type": "chunk",
@@ -118,21 +118,22 @@ export const pois: PointOfInterest[] = [
   },
   {
     "title": "Outils pour démarrer",
-    "color": "white",
+    "color": "gray",
     "type": "startup",
     "x": 12,
     "y": 26
   },
   {
     "title": "Ferme à Bonemeal",
-    "color": "white",
+    "color": "gray",
     "type": "startup",
     "x": -3,
     "y": 12
   },
   {
     "title": "Stock à Bonemeal",
-    "color": "white",
+    "color": "gray",
+    "type": "startup",
     "x": 31,
     "y": -9
   },
