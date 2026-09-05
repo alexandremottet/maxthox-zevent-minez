@@ -7,8 +7,8 @@ export const MAP_SCALE = 16;
 
 // poi.json coordinates are Minecraft world x/z; world (0, 0) sits at this
 // pixel in the generated map image (measured at MAP_SCALE)
-export const WORLD_ORIGIN_PIXEL_X = 4100;
-export const WORLD_ORIGIN_PIXEL_Y = 4100;
+export const WORLD_ORIGIN_PIXEL_X = 4091;
+export const WORLD_ORIGIN_PIXEL_Y = 8200;
 
 // one Minecraft chunk = 16x16 blocks
 export const CHUNK_SIZE = 16;
@@ -304,7 +304,13 @@ export function renderPois<T extends PointOfInterest>(
 
     const bindInteraction = (layer: L.Layer) => {
       if (onClick) {
-        layer.on("click", () => onClick(poi));
+        // rectangles bubble click to the map by default (unlike markers), which would
+        // also fire the admin's "click empty map to set coordinates" handler and
+        // overwrite the fields this onClick just filled in with the click's own position
+        layer.on("click", (event: L.LeafletMouseEvent) => {
+          L.DomEvent.stopPropagation(event);
+          onClick(poi);
+        });
       } else if (poi.title) {
         layer.bindPopup(createPopupContent(poi.title, poi.description));
       }
