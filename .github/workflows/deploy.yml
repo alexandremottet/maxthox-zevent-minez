@@ -88,21 +88,33 @@ jobs:
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
 
+      # GitHub secrets are the source of truth; sync them to Vercel's persistent
+      # project env vars (not deploy-time --env flags, which don't reliably
+      # survive Vercel reusing a build cache across deployments) so the deployed
+      # function always has what requireEnv() expects on every request.
+      - name: Sync env vars to Vercel
+        run: |
+          sync_env() {
+            name="$1"
+            value="$2"
+            pnpm dlx vercel@latest env rm "$name" production --yes --token="${{ secrets.VERCEL_TOKEN }}" >/dev/null 2>&1 || true
+            printf '%s' "$value" | pnpm dlx vercel@latest env add "$name" production --token="${{ secrets.VERCEL_TOKEN }}"
+          }
+          sync_env MONGODB_URI "${{ secrets.MONGODB_URI }}"
+          sync_env BETTER_AUTH_SECRET "${{ secrets.BETTER_AUTH_SECRET }}"
+          sync_env BETTER_AUTH_URL "${{ secrets.BETTER_AUTH_URL }}"
+          sync_env GITHUB_TOKEN "${{ secrets.ADMIN_GITHUB_TOKEN }}"
+          sync_env GITHUB_REPO "alexandremottet/maxthox-zevent-minez"
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
       # Root Directory (apps/voxelmap-admin) is configured on the Vercel project
       # itself, so this uploads the whole checked-out workspace (pnpm-lock.yaml,
       # the map-render package, and the just-refreshed map/POI data included) and
-      # Vercel builds inside that subdirectory. -e/--env sets the deployed
-      # function's runtime env vars — this app reads them via requireEnv() on
-      # every request, so they must be present on the deployment itself.
+      # Vercel builds inside that subdirectory.
       - name: Deploy admin to Vercel
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: |
-          pnpm dlx vercel@latest deploy --prod --yes \
-            --token="${{ secrets.VERCEL_TOKEN }}" \
-            --env MONGODB_URI="${{ secrets.MONGODB_URI }}" \
-            --env BETTER_AUTH_SECRET="${{ secrets.BETTER_AUTH_SECRET }}" \
-            --env BETTER_AUTH_URL="${{ secrets.BETTER_AUTH_URL }}" \
-            --env GITHUB_TOKEN="${{ secrets.ADMIN_GITHUB_TOKEN }}" \
-            --env GITHUB_REPO="alexandremottet/maxthox-zevent-minez"
+        run: pnpm dlx vercel@latest deploy --prod --yes --token="${{ secrets.VERCEL_TOKEN }}"
