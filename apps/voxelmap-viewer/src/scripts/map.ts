@@ -231,9 +231,14 @@ function applyVisualizer(id: string): void {
     visualizerIframe.hidden = true;
     visualizerIframe.src = "";
   } else if (iframeSrc) {
+    // "localhost" isn't a reliable signal — `astro preview` also serves from
+    // there, and preview is meant to show real production behavior. Astro's
+    // own DEV flag (baked in at build time; false for both preview and the
+    // real deployed site) is what BlueMap's injected script actually checks.
+    const src = import.meta.env.DEV ? `${iframeSrc}?bluemapControls=1` : iframeSrc;
     visualizerPlaceholderLabel.hidden = true;
     visualizerIframe.hidden = false;
-    if (visualizerIframe.src !== new URL(iframeSrc, location.href).href) visualizerIframe.src = iframeSrc;
+    if (visualizerIframe.src !== new URL(src, location.href).href) visualizerIframe.src = src;
     visualizerPlaceholder.hidden = false;
   } else {
     visualizerPlaceholderLabel.hidden = false;

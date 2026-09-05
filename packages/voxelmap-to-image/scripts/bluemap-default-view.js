@@ -12,11 +12,14 @@
 })();
 
 // hides BlueMap's own UI chrome (toolbar/sidebar, mounted at #app — see
-// index.html, separate from the #map-container canvas) everywhere except
-// localhost, so the published site shows a clean map with no BlueMap
-// controls while local dev keeps them for testing/debugging. A <style> rule
+// index.html, separate from the #map-container canvas), so the published
+// site shows a clean map with no BlueMap controls while local dev keeps them
+// for testing/debugging. The outer viewer/admin page appends ?bluemapControls
+// to this iframe's src only when built with `astro dev` (import.meta.env.DEV)
+// — NOT just "is this localhost", since `astro preview` also serves from
+// localhost but is meant to show real production behavior. A <style> rule
 // applies as soon as #app appears, no DOM-ready wait needed.
-if (location.hostname !== "localhost" && location.hostname !== "127.0.0.1") {
+if (!new URLSearchParams(location.search).has("bluemapControls")) {
   const style = document.createElement("style");
   style.textContent = "#app { display: none !important; }";
   document.head.appendChild(style);
