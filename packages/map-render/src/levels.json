@@ -1,6 +1,6 @@
 [
-  { "name": "done", "heightMin": -65, "heightMax": -55, "color": "#ff0000" },
-  { "name": "almost", "heightMin": -55, "heightMax": -45, "color": "#ffa500" },
-  { "name": "ongoing", "heightMin": -45, "heightMax": -35, "color": "#ffff00" },
-  { "name": "started", "heightMin": -35, "heightMax": -25, "color": "#0000FF" }
+  { "name": "done", "heightMin": -65, "heightMax": -59, "color": "#ff0000" },
+  { "name": "almost", "heightMin": -59, "heightMax": -50, "color": "#ffa500" },
+  { "name": "ongoing", "heightMin": -49, "heightMax": -15, "color": "#ffff00" },
+  { "name": "started", "heightMin": -15, "heightMax": 20, "color": "#0000FF" }
 ]

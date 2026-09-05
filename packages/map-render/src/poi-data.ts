@@ -12,13 +12,13 @@ export const pois: PointOfInterest[] = [
     "type": "chunk",
     "x": 16,
     "y": -16,
-    "level": "done"
+    "level": "almost"
   },
   {
     "type": "chunk",
     "x": 16,
     "y": 32,
-    "level": "done"
+    "level": "almost"
   },
   {
     "type": "chunk",
@@ -71,7 +71,7 @@ export const pois: PointOfInterest[] = [
     "type": "chunk",
     "x": 16,
     "y": -32,
-    "level": "done"
+    "level": "almost"
   },
   {
     "type": "chunk",
@@ -132,7 +132,7 @@ export const pois: PointOfInterest[] = [
     "type": "chunk",
     "x": 0,
     "y": -16,
-    "level": "almost"
+    "level": "ongoing"
   },
   {
     "type": "chunk",
@@ -255,7 +255,7 @@ export const pois: PointOfInterest[] = [
     "type": "chunk",
     "x": 48,
     "y": 32,
-    "level": "done"
+    "level": "almost"
   },
   {
     "title": "c",
@@ -318,7 +318,7 @@ export const pois: PointOfInterest[] = [
     "type": "chunk",
     "x": 64,
     "y": -96,
-    "level": "done"
+    "level": "almost"
   },
   {
     "title": "80",
@@ -408,7 +408,7 @@ export const pois: PointOfInterest[] = [
     "type": "chunk",
     "x": 16,
     "y": 128,
-    "level": "done"
+    "level": "almost"
   },
   {
     "title": "c",
@@ -450,7 +450,7 @@ export const pois: PointOfInterest[] = [
     "type": "chunk",
     "x": -16,
     "y": 144,
-    "level": "done"
+    "level": "almost"
   },
   {
     "title": "c",
@@ -510,13 +510,13 @@ export const pois: PointOfInterest[] = [
     "x": 48,
     "y": -112,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 48,
     "y": -96,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 144,
@@ -588,13 +588,13 @@ export const pois: PointOfInterest[] = [
     "x": 16,
     "y": -128,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 32,
     "y": -128,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 16,
@@ -606,13 +606,13 @@ export const pois: PointOfInterest[] = [
     "x": 32,
     "y": -112,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 64,
     "y": -112,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 96,
@@ -666,13 +666,13 @@ export const pois: PointOfInterest[] = [
     "x": 128,
     "y": -48,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 128,
     "y": -32,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 96,
@@ -708,7 +708,7 @@ export const pois: PointOfInterest[] = [
     "x": 160,
     "y": 0,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 96,
@@ -864,12 +864,270 @@ export const pois: PointOfInterest[] = [
     "x": 0,
     "y": -128,
     "type": "chunk",
-    "level": "started"
+    "level": "done"
   },
   {
     "x": 112,
     "y": -64,
     "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 48,
+    "y": -144,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 64,
+    "y": -144,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 96,
+    "y": -144,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 48,
+    "y": -128,
+    "type": "chunk",
     "level": "ongoing"
+  },
+  {
+    "x": 64,
+    "y": -128,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 80,
+    "y": -128,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 0,
+    "y": -112,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 112,
+    "y": -112,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 0,
+    "y": -96,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 112,
+    "y": -96,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 128,
+    "y": -96,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 128,
+    "y": -80,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 144,
+    "y": -80,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 160,
+    "y": -80,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 128,
+    "y": -64,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 160,
+    "y": -64,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 176,
+    "y": -64,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 160,
+    "y": -48,
+    "type": "chunk",
+    "level": "ongoing"
+  },
+  {
+    "x": 176,
+    "y": -48,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 160,
+    "y": -32,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 176,
+    "y": -32,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 80,
+    "y": 48,
+    "type": "chunk",
+    "level": "ongoing"
+  },
+  {
+    "x": 16,
+    "y": 80,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 32,
+    "y": 80,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 16,
+    "y": 96,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 544,
+    "y": -64,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": -16,
+    "y": -112,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 80,
+    "y": -144,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 112,
+    "y": -128,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 32,
+    "y": 48,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 48,
+    "y": 48,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 64,
+    "y": 48,
+    "type": "chunk",
+    "level": "ongoing"
+  },
+  {
+    "x": -16,
+    "y": -128,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 16,
+    "y": 64,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 32,
+    "y": 64,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 48,
+    "y": 64,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 64,
+    "y": 64,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 80,
+    "y": 64,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 48,
+    "y": 80,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 64,
+    "y": 80,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 80,
+    "y": 80,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 32,
+    "y": 96,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 48,
+    "y": 96,
+    "type": "chunk",
+    "level": "started"
   }
 ];
