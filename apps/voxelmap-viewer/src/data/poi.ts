@@ -1,10 +1,17 @@
 import poiData from "./poi.json";
 
 interface PointOfInterestBase {
-  title: string;
+  /** omit for an unlabeled marker (no popup) */
+  title?: string;
   description?: string;
   /** any CSS color, e.g. "red", "blue", "#3498db". Defaults to red. */
   color?: string;
+  /**
+   * defaults to none. "chunk" draws a red cross instead of the shine fill.
+   * On a point POI, (x, y) is treated as the chunk's origin corner and
+   * expanded to a 16x16 block zone.
+   */
+  type?: "chunk";
 }
 
 export interface PointPointOfInterest extends PointOfInterestBase {
@@ -25,4 +32,6 @@ export function isZone(poi: PointOfInterest): poi is ZonePointOfInterest {
   return "x1" in poi;
 }
 
-export const pois: PointOfInterest[] = poiData;
+// JSON imports widen string literal fields (e.g. "type") to plain `string`,
+// so TS can't structurally verify the union here — trusted cast instead.
+export const pois: PointOfInterest[] = poiData as PointOfInterest[];

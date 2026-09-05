@@ -6,49 +6,67 @@
     "y": 0
   },
   {
+    "type": "chunk",
+    "x": 16,
+    "y": 32
+  },
+  {
+    "type": "chunk",
+    "x": 16,
+    "y": 16
+  },
+  {
     "title": "Farm à PDT",
     "description": "On n'en récolte un peu pour les autres et on replante.",
     "x1": 323,
     "y1": 76,
     "x2": 399,
-    "y2": 32
+    "y2": 32,
+    "color": "green"
   },
   {
     "title": "Stock Pomme de Terre Village",
     "description": "Un stack à la fois.",
     "x": 315,
-    "y": 82
+    "y": 82,
+    "color": "green"
   },
   {
     "title": "Ferme XP Village",
     "description": "On fais attention quand on tape les stands et on en remet un si il casse.",
     "x": 315,
-    "y": 93
+    "y": 93,
+    "color": "green"
   },
   {
     "title": "Foret bois village",
     "x": 218,
-    "y": 34
+    "y": 34,
+    "color": "white"
   },
   {
     "title": "Fer pour beacon",
     "description": "Ne rien prendre, c'est pour les beacon.",
     "x": 7,
-    "y": 63
+    "y": 63,
+    "color": "red"
   },
   {
     "title": "Outils pour démarrer",
     "x": 12,
-    "y": 31
+    "y": 31,
+    "color": "blue"
   },
   {
     "title": "Ferme à Bonemeal",
-    "x": 12,
-    "y": 31
+    "x": 5,
+    "y": 4,
+    "color": "blue"
   },
   {
     "title": "Spawn",
     "x": 0,
-    "y": 0
+    "y": 0,
+    "color": "white"
   }
 ]
