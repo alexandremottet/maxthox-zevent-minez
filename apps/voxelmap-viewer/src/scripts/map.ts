@@ -4,7 +4,10 @@ import "@south-paw/typeface-minecraft";
 import { renderPois, fromLatLng, toLatLng, setupMapImage, mapQuadrants, pois } from "map-render";
 
 // permissive range so getBoundsZoom below isn't clamped to Leaflet's default 0..18
-const map = L.map("map", { crs: L.CRS.Simple, minZoom: -20, maxZoom: 20, zoomControl: false });
+// zoomAnimation off: the quadrant images are huge single <img> elements, and
+// animating the zoom means the browser rescales them every frame — jumping
+// straight to the new zoom instead is the cheap fix for the resulting lag
+const map = L.map("map", { crs: L.CRS.Simple, minZoom: -20, maxZoom: 20, zoomControl: false, zoomAnimation: false });
 
 const bounds = setupMapImage(map, mapQuadrants);
 
