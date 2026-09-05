@@ -61,73 +61,73 @@ jobs:
       - uses: actions/deploy-pages@v4
         id: deployment
 
-  deploy-admin:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+  # deploy-admin:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 11
+  #     - uses: pnpm/action-setup@v4
+  #       with:
+  #         version: 11
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 22
+  #         cache: pnpm
 
-      - run: pnpm install --frozen-lockfile
+  #     - run: pnpm install --frozen-lockfile
 
-      - name: Generate map image from VoxelMap data
-        run: pnpm --filter voxelmap-to-image run map
+  #     - name: Generate map image from VoxelMap data
+  #       run: pnpm --filter voxelmap-to-image run map
 
-      - name: Embed map into the shared map-render package
-        run: pnpm --filter map-render run generate-map
+  #     - name: Embed map into the shared map-render package
+  #       run: pnpm --filter map-render run generate-map
 
-      - name: Fetch POIs from the database
-        run: pnpm --filter map-render run fetch-pois
-        env:
-          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+  #     - name: Fetch POIs from the database
+  #       run: pnpm --filter map-render run fetch-pois
+  #       env:
+  #         MONGODB_URI: ${{ secrets.MONGODB_URI }}
 
-      # GitHub secrets are the source of truth; sync them to Vercel's persistent
-      # project env vars so the deployed function always has what requireEnv()
-      # expects on every request. Uses the REST API directly, not `vercel env add`
-      # — that CLI command silently stores an EMPTY value when fed via a piped
-      # stdin in this non-interactive context (verified: the API shows
-      # `"value": ""` afterwards despite the CLI reporting success).
-      - name: Sync env vars to Vercel
-        run: |
-          sync_env() {
-            name="$1"
-            value="$2"
-            existing_id=$(curl -s -H "Authorization: Bearer $VERCEL_TOKEN" \
-              "https://api.vercel.com/v10/projects/$VERCEL_PROJECT_ID/env?teamId=$VERCEL_ORG_ID" \
-              | jq -r --arg k "$name" '.envs[] | select(.key==$k) | .id' | head -1)
-            if [ -n "$existing_id" ]; then
-              curl -s -X DELETE -H "Authorization: Bearer $VERCEL_TOKEN" \
-                "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID/env/$existing_id?teamId=$VERCEL_ORG_ID" > /dev/null
-            fi
-            curl -s -X POST "https://api.vercel.com/v10/projects/$VERCEL_PROJECT_ID/env?teamId=$VERCEL_ORG_ID" \
-              -H "Authorization: Bearer $VERCEL_TOKEN" \
-              -H "Content-Type: application/json" \
-              -d "$(jq -n --arg k "$name" --arg v "$value" '{key:$k, value:$v, type:"encrypted", target:["production"]}')" \
-              | jq -e '.key' > /dev/null
-          }
-          sync_env MONGODB_URI "${{ secrets.MONGODB_URI }}"
-          sync_env BETTER_AUTH_SECRET "${{ secrets.BETTER_AUTH_SECRET }}"
-          sync_env BETTER_AUTH_URL "${{ secrets.BETTER_AUTH_URL }}"
-          sync_env GITHUB_TOKEN "${{ secrets.ADMIN_GITHUB_TOKEN }}"
-          sync_env GITHUB_REPO "alexandremottet/maxthox-zevent-minez"
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  #     # GitHub secrets are the source of truth; sync them to Vercel's persistent
+  #     # project env vars so the deployed function always has what requireEnv()
+  #     # expects on every request. Uses the REST API directly, not `vercel env add`
+  #     # — that CLI command silently stores an EMPTY value when fed via a piped
+  #     # stdin in this non-interactive context (verified: the API shows
+  #     # `"value": ""` afterwards despite the CLI reporting success).
+  #     - name: Sync env vars to Vercel
+  #       run: |
+  #         sync_env() {
+  #           name="$1"
+  #           value="$2"
+  #           existing_id=$(curl -s -H "Authorization: Bearer $VERCEL_TOKEN" \
+  #             "https://api.vercel.com/v10/projects/$VERCEL_PROJECT_ID/env?teamId=$VERCEL_ORG_ID" \
+  #             | jq -r --arg k "$name" '.envs[] | select(.key==$k) | .id' | head -1)
+  #           if [ -n "$existing_id" ]; then
+  #             curl -s -X DELETE -H "Authorization: Bearer $VERCEL_TOKEN" \
+  #               "https://api.vercel.com/v9/projects/$VERCEL_PROJECT_ID/env/$existing_id?teamId=$VERCEL_ORG_ID" > /dev/null
+  #           fi
+  #           curl -s -X POST "https://api.vercel.com/v10/projects/$VERCEL_PROJECT_ID/env?teamId=$VERCEL_ORG_ID" \
+  #             -H "Authorization: Bearer $VERCEL_TOKEN" \
+  #             -H "Content-Type: application/json" \
+  #             -d "$(jq -n --arg k "$name" --arg v "$value" '{key:$k, value:$v, type:"encrypted", target:["production"]}')" \
+  #             | jq -e '.key' > /dev/null
+  #         }
+  #         sync_env MONGODB_URI "${{ secrets.MONGODB_URI }}"
+  #         sync_env BETTER_AUTH_SECRET "${{ secrets.BETTER_AUTH_SECRET }}"
+  #         sync_env BETTER_AUTH_URL "${{ secrets.BETTER_AUTH_URL }}"
+  #         sync_env GITHUB_TOKEN "${{ secrets.ADMIN_GITHUB_TOKEN }}"
+  #         sync_env GITHUB_REPO "alexandremottet/maxthox-zevent-minez"
+  #       env:
+  #         VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  #         VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  #         VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
-      # Root Directory (apps/voxelmap-admin) is configured on the Vercel project
-      # itself, so this uploads the whole checked-out workspace (pnpm-lock.yaml,
-      # the map-render package, and the just-refreshed map/POI data included) and
-      # Vercel builds inside that subdirectory.
-      - name: Deploy admin to Vercel
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: pnpm dlx vercel@latest deploy --prod --yes --force --token="${{ secrets.VERCEL_TOKEN }}"
+  #     # Root Directory (apps/voxelmap-admin) is configured on the Vercel project
+  #     # itself, so this uploads the whole checked-out workspace (pnpm-lock.yaml,
+  #     # the map-render package, and the just-refreshed map/POI data included) and
+  #     # Vercel builds inside that subdirectory.
+  #     - name: Deploy admin to Vercel
+  #       env:
+  #         VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  #         VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  #       run: pnpm dlx vercel@latest deploy --prod --yes --force --token="${{ secrets.VERCEL_TOKEN }}"
