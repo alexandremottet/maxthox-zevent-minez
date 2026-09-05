@@ -1,7 +1,7 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "@south-paw/typeface-minecraft";
-import { renderPois, fromLatLng, mapDataUrl, mapHeight, mapWidth, pois } from "map-render";
+import { renderPois, fromLatLng, addMapWash, mapDataUrl, mapHeight, mapWidth, pois } from "map-render";
 
 // permissive range so getBoundsZoom below isn't clamped to Leaflet's default 0..18
 const map = L.map("map", { crs: L.CRS.Simple, minZoom: -20, maxZoom: 20, zoomControl: false });
@@ -12,6 +12,7 @@ const bounds: L.LatLngBoundsExpression = [
 ];
 
 L.imageOverlay(mapDataUrl, bounds).addTo(map);
+addMapWash(map, bounds);
 
 // can't zoom out past seeing the whole map, can zoom in up to 8x beyond that
 const fitZoom = map.getBoundsZoom(bounds, true);

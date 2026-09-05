@@ -1,7 +1,7 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "@south-paw/typeface-minecraft";
-import { renderPois, fromLatLng, isZone, mapDataUrl, mapHeight, mapWidth } from "map-render";
+import { renderPois, fromLatLng, isZone, addMapWash, mapDataUrl, mapHeight, mapWidth } from "map-render";
 import { authClient } from "../lib/auth-client.ts";
 import type { AdminPoi } from "../lib/poi-db.ts";
 
@@ -20,6 +20,7 @@ const bounds: L.LatLngBoundsExpression = [
 ];
 
 L.imageOverlay(mapDataUrl, bounds).addTo(map);
+addMapWash(map, bounds);
 
 const fitZoom = map.getBoundsZoom(bounds, true);
 map.setMinZoom(fitZoom);

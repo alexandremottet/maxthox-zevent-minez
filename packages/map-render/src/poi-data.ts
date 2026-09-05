@@ -44,8 +44,8 @@ export const pois: PointOfInterest[] = [
   },
   {
     "type": "chunk",
-    "x": 49,
-    "y": -6
+    "x": 32,
+    "y": 0
   },
   {
     "type": "chunk",
@@ -93,6 +93,7 @@ export const pois: PointOfInterest[] = [
     "y": 0
   },
   {
+    "title": "chunk",
     "type": "chunk",
     "x": 49,
     "y": 0
@@ -209,5 +210,77 @@ export const pois: PointOfInterest[] = [
     "type": "chunk",
     "x": 48,
     "y": 16
+  },
+  {
+    "title": "chunk",
+    "type": "chunk",
+    "x": 32,
+    "y": 32
+  },
+  {
+    "title": "ch",
+    "type": "chunk",
+    "x": 48,
+    "y": 32
+  },
+  {
+    "title": "c",
+    "type": "chunk",
+    "x": 64,
+    "y": 32
+  },
+  {
+    "title": "c",
+    "type": "chunk",
+    "x": 64,
+    "y": 16
+  },
+  {
+    "title": "c",
+    "type": "chunk",
+    "x": 48,
+    "y": -80
+  },
+  {
+    "title": "c",
+    "type": "chunk",
+    "x": 32,
+    "y": -80
+  },
+  {
+    "title": "c",
+    "type": "chunk",
+    "x": 16,
+    "y": -80
+  },
+  {
+    "title": "c",
+    "type": "chunk",
+    "x": 0,
+    "y": -80
+  },
+  {
+    "title": "c",
+    "type": "chunk",
+    "x": 80,
+    "y": -80
+  },
+  {
+    "title": "c",
+    "type": "chunk",
+    "x": 80,
+    "y": -96
+  },
+  {
+    "title": "c",
+    "type": "chunk",
+    "x": 64,
+    "y": -96
+  },
+  {
+    "title": "80",
+    "type": "chunk",
+    "x": 80,
+    "y": -64
   }
 ];

@@ -148,6 +148,8 @@ function drawZone(
     weight: 2,
     fillColor: isChunk ? "#000" : `url(#${SHINE_GRADIENT_ID})`,
     fillOpacity: isChunk ? 0 : 1,
+    // chunks keep the flat pixel-cross look with no shadow; other zones get the shared pixelated shadow
+    className: isChunk ? undefined : "poi-zone-shape",
   }).addTo(target);
 
   if (isChunk) {
@@ -215,6 +217,22 @@ function makeRectangleDraggable(
   });
 }
 
+// font-size drives the marker's em-based drop-shadow (see .poi-marker-icon
+// CSS) so the pixelated shadow scales together with the icon, not just a
+// fixed px offset that looks wrong once the icon itself resizes with zoom
+function applyMarkerElementStyle(el: HTMLElement | null, color: string, size: L.PointTuple): void {
+  if (!el) return;
+  el.style.setProperty("border-color", color);
+  el.style.setProperty("--poi-color", color);
+  el.style.fontSize = `${size[0]}px`;
+}
+
+// subtle full-map wash that sits above the base image but below every POI:
+// zones/markers live in a layer stacked above this one, so they stay unaffected
+export function addMapWash(map: L.Map, bounds: L.LatLngBoundsExpression): void {
+  L.rectangle(bounds, { stroke: false, fillColor: "#fff", fillOpacity: 0.12, interactive: false }).addTo(map);
+}
+
 export interface ListEntry {
   title: string;
   color: string;
@@ -251,8 +269,12 @@ export function renderPois<T extends PointOfInterest>(
     onClick,
     onMove,
   } = options;
-  const poiIcon = L.divIcon({ className: "poi-marker-icon", iconSize });
-  const startupIcon = L.divIcon({ className: "poi-marker-icon", iconSize: startupIconSize });
+  // clip-path lives on an inner .poi-marker-shape span, not this outer element:
+  // a filter's drop-shadow gets clipped away by its own element's clip-path in
+  // browsers, so the shadow has to live on an ancestor that has no clip-path
+  const markerHtml = '<span class="poi-marker-shape"></span>';
+  const poiIcon = L.divIcon({ className: "poi-marker-icon", iconSize, html: markerHtml });
+  const startupIcon = L.divIcon({ className: "poi-marker-icon", iconSize: startupIconSize, html: markerHtml });
 
   // iconSize/startupIconSize are CSS pixels at the current zoom; markers should
   // scale with the map like the chunk/zone rectangles do, so track each marker's
@@ -345,9 +367,7 @@ export function renderPois<T extends PointOfInterest>(
           onMove(poi, { x: Math.round(world.x), y: Math.round(world.y) });
         });
       }
-      const el = marker.getElement();
-      el?.style.setProperty("border-color", color);
-      el?.style.setProperty("--poi-color", color);
+      applyMarkerElementStyle(marker.getElement(), color, poi.type === "startup" ? startupIconSize : iconSize);
       scaledMarkers.push({ marker, baseSize: poi.type === "startup" ? startupIconSize : iconSize, color });
     }
 
@@ -361,10 +381,8 @@ export function renderPois<T extends PointOfInterest>(
       const factor = 2 ** (map.getZoom() - referenceZoom);
       for (const { marker, baseSize, color } of scaledMarkers) {
         const scaledSize: L.PointTuple = [baseSize[0] * factor, baseSize[1] * factor];
-        marker.setIcon(L.divIcon({ className: "poi-marker-icon", iconSize: scaledSize }));
-        const el = marker.getElement();
-        el?.style.setProperty("border-color", color);
-        el?.style.setProperty("--poi-color", color);
+        marker.setIcon(L.divIcon({ className: "poi-marker-icon", iconSize: scaledSize, html: markerHtml }));
+        applyMarkerElementStyle(marker.getElement(), color, scaledSize);
       }
     });
   }
