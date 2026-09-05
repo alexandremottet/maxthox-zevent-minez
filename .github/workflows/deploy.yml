@@ -88,6 +88,15 @@ jobs:
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
 
+      # `vercel deploy` accepts VERCEL_ORG_ID/VERCEL_PROJECT_ID env vars directly,
+      # but `vercel env` doesn't — it only reads a local .vercel/project.json link
+      # file, which a fresh CI checkout never has. Write it explicitly so both
+      # this step and the deploy step below resolve the same linked project.
+      - name: Link Vercel project
+        run: |
+          mkdir -p .vercel
+          printf '{"projectId":"%s","orgId":"%s"}' "${{ secrets.VERCEL_PROJECT_ID }}" "${{ secrets.VERCEL_ORG_ID }}" > .vercel/project.json
+
       # GitHub secrets are the source of truth; sync them to Vercel's persistent
       # project env vars (not deploy-time --env flags, which don't reliably
       # survive Vercel reusing a build cache across deployments) so the deployed
