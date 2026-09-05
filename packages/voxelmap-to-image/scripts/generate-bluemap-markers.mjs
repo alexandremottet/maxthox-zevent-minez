@@ -1,8 +1,11 @@
 // Translates every overlay already shown in the Leaflet viewer — level-colored
 // chunk POIs (chunk-scanner), the percent-dug overlay (blockdata-scanner),
 // and the remaining POI categories from the Filter panel (zone/startup/other)
-// — into BlueMap marker-set config, as separate toggleable marker sets
-// mirroring the viewer's Filter panel checkboxes one-to-one.
+// — into BlueMap marker-set config. Marker-set ids are named to match
+// render.ts's categoryGroups keys EXACTLY (level names, "zone", "startup",
+// "other") so the viewer's Filter panel can drive both the Leaflet layer and
+// the matching BlueMap marker set from one shared checkbox (see map.ts's
+// toggleCategory, which reaches into the iframe by this same id).
 //
 // Reads already-generated files (no MongoDB call, no new dependency):
 // map-render's checked-in poi-data.ts, percent-data.ts, and levels.json.
@@ -103,6 +106,11 @@ function rectMarker(x1, z1, x2, z2, label, { r, g, b }) {
     "line-width": 2,
     "line-color": { r, g, b, a: 1.0 },
     "fill-color": { r, g, b, a: 0.5 },
+    // most POIs sit on normal surface terrain well above y=64 (only dug-out
+    // chunks are actually near sea level) — without this, BlueMap depth-tests
+    // the marker against real terrain and it renders invisible, occluded
+    // underground
+    "depth-test": false,
   };
 }
 
@@ -118,9 +126,9 @@ const DEFAULT_POI_COLOR = "red";
 const pois = readGeneratedArray(join(mapRenderSrc, "poi-data.ts"));
 const chunkPois = pois.filter((poi) => poi.type === "chunk" && levelColor.has(poi.level));
 
-const chunkMarkers = {};
+const chunkMarkersByLevel = new Map(levels.map((level) => [level.name, {}]));
 for (const { x, y: z, level } of chunkPois) {
-  chunkMarkers[`chunk_${x}_${z}`] = shapeMarker(x, z, level, hexToRgb(levelColor.get(level)));
+  chunkMarkersByLevel.get(level)[`chunk_${x}_${z}`] = shapeMarker(x, z, level, hexToRgb(levelColor.get(level)));
 }
 
 const chunkPercents = readGeneratedArray(join(mapRenderSrc, "percent-data.ts"));
@@ -149,37 +157,38 @@ for (const poi of pois) {
   }
 }
 
-const markerSets = {
-  chunkProgress: {
-    label: "Chunk Progress",
+const markerSets = {};
+for (const level of levels) {
+  markerSets[level.name] = {
+    label: `${level.name} chunk`,
     toggleable: true,
     "default-hidden": false,
-    markers: chunkMarkers,
-  },
-  chunkPercent: {
-    label: "Percent (beta)",
-    toggleable: true,
-    "default-hidden": true,
-    markers: percentMarkers,
-  },
-  zonePois: {
-    label: "Zone POI",
-    toggleable: true,
-    "default-hidden": false,
-    markers: zoneMarkers,
-  },
-  startupPois: {
-    label: "Startup POI",
-    toggleable: true,
-    "default-hidden": false,
-    markers: startupMarkers,
-  },
-  otherPois: {
-    label: "Other POI",
-    toggleable: true,
-    "default-hidden": false,
-    markers: otherMarkers,
-  },
+    markers: chunkMarkersByLevel.get(level.name),
+  };
+}
+markerSets.chunkPercent = {
+  label: "Percent (beta)",
+  toggleable: true,
+  "default-hidden": true,
+  markers: percentMarkers,
+};
+markerSets.zone = {
+  label: "Zone POI",
+  toggleable: true,
+  "default-hidden": false,
+  markers: zoneMarkers,
+};
+markerSets.startup = {
+  label: "Startup POI",
+  toggleable: true,
+  "default-hidden": false,
+  markers: startupMarkers,
+};
+markerSets.other = {
+  label: "Other POI",
+  toggleable: true,
+  "default-hidden": false,
+  markers: otherMarkers,
 };
 
 const conf = readFileSync(overworldConfPath, "utf8");

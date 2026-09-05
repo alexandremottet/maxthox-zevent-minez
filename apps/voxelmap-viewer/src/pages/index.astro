@@ -53,6 +53,12 @@ import Analytics from '@vercel/analytics/astro'
         padding: 6px;
       }
 
+      .hud-sheet-link {
+        bottom: 60px;
+        padding: 6px 12px;
+        text-decoration: none;
+      }
+
       .hud-button {
         background: #000;
         border: 1px solid #fff;
@@ -258,7 +264,7 @@ import Analytics from '@vercel/analytics/astro'
     </div>
 
     <div class="hud-bar hud-title">
-      <span class="minecraft-green">MATHOX1MINEZ</span>
+      <span class="minecraft-green">Mathox MineZ</span>
       <span class="minecraft-white">&nbsp;/&nbsp;</span>
       <span class="minecraft-green">ZEVENT 2026</span>
     </div>
@@ -269,6 +275,13 @@ import Analytics from '@vercel/analytics/astro'
     </div>
 
     <div id="mouse-coords" class="hud-bar hud-coords">X: -- Z: -- Y: --</div>
+
+    <a
+      href="https://docs.google.com/spreadsheets/d/1cbilaeHhUOLCptyXpI7dtu5CSrSVA8mt/edit?gid=917933655#gid=917933655"
+      target="_blank"
+      rel="noopener"
+      class="hud-bar hud-button hud-sheet-link minecraft-white"
+    >Chunks to mine (sheet)</a>
 
     <div class="hud-bar hud-toolbar">
       <button id="zoom-out" class="hud-button" aria-label="Zoom out">-</button>

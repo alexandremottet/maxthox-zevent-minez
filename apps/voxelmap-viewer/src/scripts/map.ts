@@ -98,6 +98,38 @@ map.on("mousemove", (event: L.LeafletMouseEvent) => {
   mouseCoords.textContent = `X: ${Math.round(x)} Z: ${Math.round(y)} Y: ${height ?? "?"}`;
 });
 
+// while BlueMap is the active visualizer, it covers #map, so the Leaflet
+// mousemove above never fires and this HUD would otherwise be stuck showing
+// its last Leaflet value (or the initial placeholder). Poll BlueMap's own
+// camera/controls position instead (same-origin iframe access, defensive —
+// mapViewer.controlsManager.data.position is undocumented internal state).
+// Unlike the Leaflet path, this Y is BlueMap's real recorded altitude, not an
+// estimate from heightAt().
+let blueMapCoordsTimer: ReturnType<typeof setInterval> | undefined;
+
+function updateCoordsFromBlueMap(): void {
+  try {
+    // biome-ignore lint: BlueMap's internal API is untyped
+    const bluemap = (visualizerIframe.contentWindow as any)?.bluemap;
+    const position = bluemap?.mapViewer?.controlsManager?.data?.position;
+    if (position) {
+      mouseCoords.textContent = `X: ${Math.round(position.x)} Z: ${Math.round(position.z)} Y: ${Math.round(position.y)}`;
+    }
+  } catch {
+    // iframe not ready yet — leave the HUD as-is until the next tick
+  }
+}
+
+function startBlueMapCoords(): void {
+  stopBlueMapCoords();
+  blueMapCoordsTimer = setInterval(updateCoordsFromBlueMap, 200);
+}
+
+function stopBlueMapCoords(): void {
+  clearInterval(blueMapCoordsTimer);
+  blueMapCoordsTimer = undefined;
+}
+
 const { categoryGroups, listEntries, setChunkLabelsVisible } = renderPois(map, pois, {});
 
 // --- POI list panel ---
@@ -156,16 +188,39 @@ function addFilterItem(label: string, color: string | null, onChange: (checked: 
   return checkbox;
 }
 
+// reaches into the BlueMap iframe (same-origin: /bluemap/index.html) to find
+// one of its marker sets by id — ids are generated to match categoryGroups
+// keys exactly (see generate-bluemap-markers.mjs), so the Filter panel is one
+// shared control surface for both visualizers. Defensive: returns undefined
+// (never throws) if the iframe isn't loaded yet or BlueMap's internal shape
+// (mapViewer.markers.markerSets, undocumented) doesn't match.
+function getBlueMapMarkerSet(id: string): { visible: boolean } | undefined {
+  try {
+    // biome-ignore lint: BlueMap's internal API is untyped
+    const bluemap = (visualizerIframe.contentWindow as any)?.bluemap;
+    return bluemap?.mapViewer?.markers?.markerSets?.get(id);
+  } catch {
+    return undefined;
+  }
+}
+
 function toggleCategory(category: string, visible: boolean): void {
   const group = categoryGroups.get(category);
-  if (!group) return;
-  if (visible) group.addTo(map);
-  else map.removeLayer(group);
+  if (group) {
+    if (visible) group.addTo(map);
+    else map.removeLayer(group);
+  }
+  const markerSet = getBlueMapMarkerSet(category);
+  if (markerSet) markerSet.visible = visible;
 }
 
 // chunk level colors and the percent overlay show the same chunks two
 // different ways — never both at once (see hidePercentOverlay/hideChunkLevels below)
 const chunkLevelCheckboxes: HTMLInputElement[] = [];
+// every category checkbox, keyed the same as categoryGroups/BlueMap marker-set
+// ids — lets a freshly (re)loaded BlueMap iframe be brought in sync with
+// whatever the Filter panel currently shows (see syncFiltersToBlueMap below)
+const categoryCheckboxes = new Map<string, HTMLInputElement>();
 
 for (const level of CHUNK_LEVELS) {
   const checkbox = addFilterItem(`${level.name} chunk`, level.color, (checked) => {
@@ -173,16 +228,79 @@ for (const level of CHUNK_LEVELS) {
     toggleCategory(level.name, checked);
   });
   chunkLevelCheckboxes.push(checkbox);
+  categoryCheckboxes.set(level.name, checkbox);
 }
 addFilterItem("chunk label", null, setChunkLabelsVisible);
-addFilterItem("startup POI", null, (checked) => toggleCategory("startup", checked));
-addFilterItem("other POI", null, (checked) => toggleCategory("other", checked));
-addFilterItem("zone POI", null, (checked) => toggleCategory("zone", checked));
+categoryCheckboxes.set("startup", addFilterItem("startup POI", null, (checked) => toggleCategory("startup", checked)));
+categoryCheckboxes.set("other", addFilterItem("other POI", null, (checked) => toggleCategory("other", checked)));
+categoryCheckboxes.set("zone", addFilterItem("zone POI", null, (checked) => toggleCategory("zone", checked)));
 
 toggleFilterButton.addEventListener("click", () => {
   filterPanel.hidden = !filterPanel.hidden;
   toggleFilterButton.classList.toggle("active", !filterPanel.hidden);
 });
+
+// --- percent-dug overlay (beta) ---
+// a fully separate rendering path from renderPois/categoryGroups above, kept
+// mutually exclusive with the chunk-level colors (see chunkLevelCheckboxes
+// above) — the two color the same chunks two different ways, so showing both
+// at once just overlaps them
+
+const percentGroup = renderChunkPercents(map, chunkPercents);
+const togglePercentButton = document.getElementById("toggle-percent") as HTMLButtonElement;
+
+function hidePercentOverlay(): void {
+  if (map.hasLayer(percentGroup)) {
+    map.removeLayer(percentGroup);
+    togglePercentButton.classList.remove("active");
+  }
+  const markerSet = getBlueMapMarkerSet("chunkPercent");
+  if (markerSet) markerSet.visible = false;
+}
+
+function hideChunkLevels(): void {
+  for (const checkbox of chunkLevelCheckboxes) {
+    if (checkbox.checked) {
+      checkbox.checked = false;
+      checkbox.dispatchEvent(new Event("change"));
+    }
+  }
+}
+
+togglePercentButton.addEventListener("click", () => {
+  const visible = !map.hasLayer(percentGroup);
+  if (visible) {
+    hideChunkLevels();
+    percentGroup.addTo(map);
+  } else {
+    map.removeLayer(percentGroup);
+  }
+  togglePercentButton.classList.toggle("active", visible);
+  const markerSet = getBlueMapMarkerSet("chunkPercent");
+  if (markerSet) markerSet.visible = visible;
+});
+
+// pushes the Filter panel's current state (source of truth) into a freshly
+// (re)loaded BlueMap iframe, so switching visualizers doesn't reset back to
+// BlueMap's own defaultHidden config — polls briefly since BlueMap's app JS
+// finishes initializing asynchronously after the iframe's document loads
+function syncFiltersToBlueMap(): void {
+  let attemptsLeft = 25; // ~5s at 200ms
+  function attempt(): void {
+    const anyMarkerSet = getBlueMapMarkerSet(CHUNK_LEVELS[0]?.name ?? "zone");
+    if (!anyMarkerSet && attemptsLeft-- > 0) {
+      setTimeout(attempt, 200);
+      return;
+    }
+    for (const [category, checkbox] of categoryCheckboxes) {
+      const markerSet = getBlueMapMarkerSet(category);
+      if (markerSet) markerSet.visible = checkbox.checked;
+    }
+    const percentMarkerSet = getBlueMapMarkerSet("chunkPercent");
+    if (percentMarkerSet) percentMarkerSet.visible = map.hasLayer(percentGroup);
+  }
+  attempt();
+}
 
 // --- visualizer picker ---
 
@@ -230,6 +348,7 @@ function applyVisualizer(id: string): void {
     visualizerPlaceholder.hidden = true;
     visualizerIframe.hidden = true;
     visualizerIframe.src = "";
+    stopBlueMapCoords();
   } else if (iframeSrc) {
     // "localhost" isn't a reliable signal — `astro preview` also serves from
     // there, and preview is meant to show real production behavior. Astro's
@@ -238,13 +357,18 @@ function applyVisualizer(id: string): void {
     const src = import.meta.env.DEV ? `${iframeSrc}?bluemapControls=1` : iframeSrc;
     visualizerPlaceholderLabel.hidden = true;
     visualizerIframe.hidden = false;
-    if (visualizerIframe.src !== new URL(src, location.href).href) visualizerIframe.src = src;
+    if (visualizerIframe.src !== new URL(src, location.href).href) {
+      visualizerIframe.src = src;
+      syncFiltersToBlueMap();
+    }
     visualizerPlaceholder.hidden = false;
+    if (visualizer.id === "bluemap") startBlueMapCoords();
   } else {
     visualizerPlaceholderLabel.hidden = false;
     visualizerPlaceholderLabel.textContent = `${visualizer.label} — coming soon`;
     visualizerIframe.hidden = true;
     visualizerPlaceholder.hidden = false;
+    stopBlueMapCoords();
   }
 }
 
@@ -255,40 +379,4 @@ applyVisualizer(savedVisualizerId);
 visualizerSelect.addEventListener("change", () => {
   saveVisualizerId(visualizerSelect.value);
   applyVisualizer(visualizerSelect.value);
-});
-
-// --- percent-dug overlay (beta) ---
-// a fully separate rendering path from renderPois/categoryGroups above, kept
-// mutually exclusive with the chunk-level colors (see chunkLevelCheckboxes
-// above) — the two color the same chunks two different ways, so showing both
-// at once just overlaps them
-
-const percentGroup = renderChunkPercents(map, chunkPercents);
-const togglePercentButton = document.getElementById("toggle-percent") as HTMLButtonElement;
-
-function hidePercentOverlay(): void {
-  if (map.hasLayer(percentGroup)) {
-    map.removeLayer(percentGroup);
-    togglePercentButton.classList.remove("active");
-  }
-}
-
-function hideChunkLevels(): void {
-  for (const checkbox of chunkLevelCheckboxes) {
-    if (checkbox.checked) {
-      checkbox.checked = false;
-      checkbox.dispatchEvent(new Event("change"));
-    }
-  }
-}
-
-togglePercentButton.addEventListener("click", () => {
-  const visible = !map.hasLayer(percentGroup);
-  if (visible) {
-    hideChunkLevels();
-    percentGroup.addTo(map);
-  } else {
-    map.removeLayer(percentGroup);
-  }
-  togglePercentButton.classList.toggle("active", visible);
 });

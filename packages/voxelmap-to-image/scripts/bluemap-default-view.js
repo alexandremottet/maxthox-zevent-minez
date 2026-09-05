@@ -25,35 +25,10 @@ if (!new URLSearchParams(location.search).has("bluemapControls")) {
   document.head.appendChild(style);
 }
 
-// keeps the "chunkProgress" (level colors) and "chunkPercent" marker sets
-// mutually exclusive, same as the Leaflet viewer's Filter panel — they color
-// the same chunks two different ways. BlueMap has no built-in radio-group
-// concept for marker sets and exposes no change event for one, so this polls
-// the reactive MarkerSet.visible flags (found in the compiled webapp bundle:
-// each root marker set is a MarkerSet instance stored in
-// mapViewer.markers.markerSets, a Map keyed by id, with a `.visible`
-// getter/setter) — fragile to a future BlueMap internals change, but
-// defensive: it no-ops entirely if the expected shape isn't found.
-(function enforceExclusivity() {
-  const lastVisible = { chunkProgress: true, chunkPercent: false };
-
-  function poll() {
-    const markerSets = window.bluemap && window.bluemap.mapViewer && window.bluemap.mapViewer.markers && window.bluemap.mapViewer.markers.markerSets;
-    if (markerSets && typeof markerSets.get === "function") {
-      const chunkProgress = markerSets.get("chunkProgress");
-      const chunkPercent = markerSets.get("chunkPercent");
-      if (chunkProgress && chunkPercent) {
-        if (chunkProgress.visible && chunkPercent.visible) {
-          // whichever was already visible before this poll is the one to
-          // hide — the other one is what the user just turned on
-          if (lastVisible.chunkProgress) chunkProgress.visible = false;
-          else chunkPercent.visible = false;
-        }
-        lastVisible.chunkProgress = chunkProgress.visible;
-        lastVisible.chunkPercent = chunkPercent.visible;
-      }
-    }
-    setTimeout(poll, 300);
-  }
-  poll();
-})();
+// Mutual exclusivity between chunk-level colors and the percent overlay, and
+// keeping this in sync with the Leaflet Filter panel, is now handled from the
+// viewer's outer page (map.ts: toggleCategory/syncFiltersToBlueMap), which
+// reaches into this iframe directly since it's same-origin — the Filter panel
+// is the one shared control surface for both visualizers. A poll used to live
+// here duplicating that logic against the old single "chunkProgress" set (now
+// split per level: done/almost/ongoing/started); removed as redundant.
