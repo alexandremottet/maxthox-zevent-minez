@@ -235,7 +235,7 @@ import Analytics from '@vercel/analytics/astro'
       <button id="zoom-fit" class="hud-button" aria-label="Fit whole map">Fit</button>
       <button id="zoom-in" class="hud-button" aria-label="Zoom in">+</button>
       <button id="toggle-list" class="hud-button active" aria-label="Toggle POI list">List</button>
-      <button id="toggle-colors" class="hud-button" aria-label="Toggle color filters">Colors</button>
+      <button id="toggle-filter" class="hud-button active" aria-label="Toggle filters">Filter</button>
     </div>
 
     <div id="poi-list" class="hud-panel hud-list">
@@ -243,9 +243,9 @@ import Analytics from '@vercel/analytics/astro'
       <ul id="poi-list-items" class="poi-list-items"></ul>
     </div>
 
-    <div id="colors-panel" class="hud-panel hud-colors" hidden>
-      <div class="hud-panel-title minecraft-white">Colors</div>
-      <ul id="color-filter-items" class="color-filter-items"></ul>
+    <div id="filter-panel" class="hud-panel hud-colors">
+      <div class="hud-panel-title minecraft-white">Filter</div>
+      <ul id="filter-items" class="color-filter-items"></ul>
     </div>
 
     <script src="../scripts/map.ts"></script>

@@ -1,7 +1,7 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "@south-paw/typeface-minecraft";
-import { renderPois, fromLatLng, heightAt, toLatLng, setupMapImage, mapQuadrants, pois } from "map-render";
+import { renderPois, fromLatLng, heightAt, toLatLng, setupMapImage, mapQuadrants, pois, CHUNK_LEVELS } from "map-render";
 
 
 // permissive range so getBoundsZoom below isn't clamped to Leaflet's default 0..18
@@ -85,7 +85,7 @@ map.on("mousemove", (event: L.LeafletMouseEvent) => {
   mouseCoords.textContent = `X: ${Math.round(x)} Z: ${Math.round(y)} Y: ${height ?? "?"}`;
 });
 
-const { colorGroups, listEntries } = renderPois(map, pois, {});
+const { categoryGroups, listEntries, setChunkLabelsVisible } = renderPois(map, pois, {});
 
 // --- POI list panel ---
 
@@ -108,42 +108,56 @@ toggleListButton.addEventListener("click", () => {
   toggleListButton.classList.toggle("active", !poiListPanel.hidden);
 });
 
-// --- color filter panel ---
+// --- filter panel ---
 
-const colorsPanel = document.getElementById("colors-panel") as HTMLElement;
-const colorFilterItems = document.getElementById("color-filter-items") as HTMLElement;
-const toggleColorsButton = document.getElementById("toggle-colors") as HTMLButtonElement;
+const filterPanel = document.getElementById("filter-panel") as HTMLElement;
+const filterItems = document.getElementById("filter-items") as HTMLElement;
+const toggleFilterButton = document.getElementById("toggle-filter") as HTMLButtonElement;
 
-for (const [color, group] of colorGroups) {
+function addFilterItem(label: string, color: string | null, onChange: (checked: boolean) => void): void {
   const item = document.createElement("li");
   item.className = "color-filter-item";
 
   const checkbox = document.createElement("input");
   checkbox.type = "checkbox";
   checkbox.checked = true;
-  checkbox.addEventListener("change", () => {
-    if (checkbox.checked) {
-      group.addTo(map);
-    } else {
-      map.removeLayer(group);
-    }
-  });
+  checkbox.addEventListener("change", () => onChange(checkbox.checked));
 
-  const swatch = document.createElement("span");
-  swatch.className = "color-swatch";
-  swatch.style.backgroundColor = color;
+  if (color) {
+    const swatch = document.createElement("span");
+    swatch.className = "color-swatch";
+    swatch.style.backgroundColor = color;
+    item.append(checkbox, swatch);
+  } else {
+    item.append(checkbox);
+  }
 
-  const label = document.createElement("span");
-  label.textContent = color;
+  const labelEl = document.createElement("span");
+  labelEl.textContent = label;
+  item.append(labelEl);
 
-  item.append(checkbox, swatch, label);
   item.addEventListener("click", (event) => {
     if (event.target !== checkbox) checkbox.click();
   });
-  colorFilterItems.append(item);
+  filterItems.append(item);
 }
 
-toggleColorsButton.addEventListener("click", () => {
-  colorsPanel.hidden = !colorsPanel.hidden;
-  toggleColorsButton.classList.toggle("active", !colorsPanel.hidden);
+function toggleCategory(category: string, visible: boolean): void {
+  const group = categoryGroups.get(category);
+  if (!group) return;
+  if (visible) group.addTo(map);
+  else map.removeLayer(group);
+}
+
+for (const level of CHUNK_LEVELS) {
+  addFilterItem(`${level.name} chunk`, level.color, (checked) => toggleCategory(level.name, checked));
+}
+addFilterItem("chunk label", null, setChunkLabelsVisible);
+addFilterItem("startup POI", null, (checked) => toggleCategory("startup", checked));
+addFilterItem("other POI", null, (checked) => toggleCategory("other", checked));
+addFilterItem("zone POI", null, (checked) => toggleCategory("zone", checked));
+
+toggleFilterButton.addEventListener("click", () => {
+  filterPanel.hidden = !filterPanel.hidden;
+  toggleFilterButton.classList.toggle("active", !filterPanel.hidden);
 });

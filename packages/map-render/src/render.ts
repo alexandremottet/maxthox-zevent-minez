@@ -314,8 +314,11 @@ export interface ListEntry {
 }
 
 export interface RenderResult {
-  colorGroups: Map<string, L.LayerGroup>;
+  /** keyed by chunk level name (see CHUNK_LEVELS), or "startup" | "zone" | "other" */
+  categoryGroups: Map<string, L.LayerGroup>;
   listEntries: ListEntry[];
+  /** shows/hides the level-name tooltip on every chunk POI at once */
+  setChunkLabelsVisible: (visible: boolean) => void;
 }
 
 export interface RenderOptions<T extends PointOfInterest> {
@@ -354,16 +357,28 @@ export function renderPois<T extends PointOfInterest>(
   const referenceZoom = map.getZoom();
   const scaledMarkers: { marker: L.Marker; baseSize: L.PointTuple; color: string }[] = [];
 
-  // one LayerGroup per POI color, so a color filter panel can show/hide a
-  // whole color's worth of markers/zones at once
-  const colorGroups = new Map<string, L.LayerGroup>();
-  function getColorGroup(color: string): L.LayerGroup {
-    let group = colorGroups.get(color);
+  // one LayerGroup per filter category, so a filter panel can show/hide a
+  // whole category at once: chunk POIs group by level name (done/almost/...),
+  // everything else groups by "startup" | "zone" | "other"
+  const categoryGroups = new Map<string, L.LayerGroup>();
+  function getCategoryGroup(category: string): L.LayerGroup {
+    let group = categoryGroups.get(category);
     if (!group) {
       group = L.layerGroup().addTo(map);
-      colorGroups.set(color, group);
+      categoryGroups.set(category, group);
     }
     return group;
+  }
+
+  // chunk POIs' level-name tooltip ("chunk label") is toggled as a group,
+  // separate from the category layer groups above since it's a display option
+  // on top of the chunk layers, not a layer of its own
+  const chunkLayers: (L.Rectangle | L.Marker)[] = [];
+  function setChunkLabelsVisible(visible: boolean): void {
+    for (const layer of chunkLayers) {
+      if (visible) layer.openTooltip();
+      else layer.closeTooltip();
+    }
   }
 
   const listEntries: ListEntry[] = [];
@@ -374,7 +389,8 @@ export function renderPois<T extends PointOfInterest>(
     if (isChunk && !isKnownChunkLevel(poi.level)) continue;
     // chunk border matches its level's color unless an admin explicitly set one
     const color = poi.color ?? (isChunk ? levelColor(poi.level) : defaultColor);
-    const group = getColorGroup(color);
+    const category = isChunk ? poi.level! : isZone(poi) ? "zone" : poi.type === "startup" ? "startup" : "other";
+    const group = getCategoryGroup(category);
     let center: L.LatLngTuple;
 
     const bindInteraction = (layer: L.Layer) => {
@@ -395,6 +411,10 @@ export function renderPois<T extends PointOfInterest>(
       const corner1 = toLatLng(poi.x1, poi.y1);
       const corner2 = toLatLng(poi.x2, poi.y2);
       const rectangle = drawZone(map, group, corner1, corner2, color, isChunk);
+      if (isChunk) {
+        rectangle.bindTooltip(poi.level ?? "", { permanent: true, direction: "center", className: "poi-chunk-level" });
+        chunkLayers.push(rectangle);
+      }
       bindInteraction(rectangle);
       if (onMove) {
         makeRectangleDraggable(
@@ -422,6 +442,7 @@ export function renderPois<T extends PointOfInterest>(
       const corner2 = toLatLng(poi.x + CHUNK_SIZE, poi.y + CHUNK_SIZE);
       const rectangle = drawZone(map, group, corner1, corner2, color, true);
       rectangle.bindTooltip(poi.level ?? "", { permanent: true, direction: "center", className: "poi-chunk-level" });
+      chunkLayers.push(rectangle);
       bindInteraction(rectangle);
       if (onMove) {
         makeRectangleDraggable(
@@ -469,5 +490,5 @@ export function renderPois<T extends PointOfInterest>(
     });
   }
 
-  return { colorGroups, listEntries };
+  return { categoryGroups, listEntries, setChunkLabelsVisible };
 }
