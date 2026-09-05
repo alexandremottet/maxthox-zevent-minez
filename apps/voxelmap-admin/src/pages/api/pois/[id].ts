@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import type { PointOfInterest } from "map-render";
-import { addPoi } from "../../lib/poi-db.ts";
+import { updatePoi, deletePoi } from "../../../lib/poi-db.ts";
 
 function isValidPoi(body: unknown): body is PointOfInterest {
   if (typeof body !== "object" || body === null) return false;
@@ -20,9 +20,14 @@ function isValidPoi(body: unknown): body is PointOfInterest {
   return hasPoint || hasZone;
 }
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const PUT: APIRoute = async ({ request, params, locals }) => {
   if (!locals.session) {
     return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
+  }
+
+  const id = params.id;
+  if (!id) {
+    return new Response(JSON.stringify({ error: "missing id" }), { status: 400 });
   }
 
   let body: unknown;
@@ -37,9 +42,30 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }
 
   try {
-    await addPoi(body);
-    // deploy is manual now (see /api/deploy) — batches multiple edits into
-    // one publish instead of rebuilding on every single save
+    await updatePoi(id, body);
+    // deploy is manual now (see /api/deploy)
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: String(error) }), { status: 500 });
+  }
+};
+
+export const DELETE: APIRoute = async ({ params, locals }) => {
+  if (!locals.session) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
+  }
+
+  const id = params.id;
+  if (!id) {
+    return new Response(JSON.stringify({ error: "missing id" }), { status: 400 });
+  }
+
+  try {
+    await deletePoi(id);
+    // deploy is manual now (see /api/deploy)
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,
       headers: { "Content-Type": "application/json" },

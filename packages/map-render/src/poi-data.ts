@@ -3,12 +3,6 @@ import type { PointOfInterest } from "./poi.ts";
 
 export const pois: PointOfInterest[] = [
   {
-    "title": "Spawn",
-    "description": "World spawn point",
-    "x": 0,
-    "y": 0
-  },
-  {
     "type": "chunk",
     "x": -16,
     "y": -80
@@ -138,39 +132,42 @@ export const pois: PointOfInterest[] = [
   },
   {
     "title": "Foret bois village",
+    "color": "green",
     "x": 218,
-    "y": 34,
-    "color": "white"
+    "y": 34
   },
   {
     "title": "Fer pour beacon",
     "description": "Ne rien prendre, c'est pour les beacon.",
     "x": 7,
-    "y": 63,
+    "y": 65,
     "color": "red"
   },
   {
     "title": "Outils pour démarrer",
+    "color": "white",
+    "type": "startup",
     "x": 12,
-    "y": 31,
-    "color": "blue"
+    "y": 26
   },
   {
     "title": "Ferme à Bonemeal",
-    "x": 5,
-    "y": 4,
-    "color": "blue"
+    "color": "white",
+    "type": "startup",
+    "x": -3,
+    "y": 12
   },
   {
     "title": "Stock à Bonemeal",
-    "x": 24,
-    "y": -13,
+    "x": 31,
+    "y": -9,
     "color": "blue"
   },
   {
     "title": "Spawn",
-    "x": 0,
-    "y": 0,
-    "color": "white"
+    "color": "purple",
+    "type": "startup",
+    "x": 1,
+    "y": 3
   }
 ];

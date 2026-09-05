@@ -1,7 +1,7 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "@south-paw/typeface-minecraft";
-import { renderPois, mapDataUrl, mapHeight, mapWidth, pois } from "map-render";
+import { renderPois, fromLatLng, mapDataUrl, mapHeight, mapWidth, pois } from "map-render";
 
 // permissive range so getBoundsZoom below isn't clamped to Leaflet's default 0..18
 const map = L.map("map", { crs: L.CRS.Simple, minZoom: -20, maxZoom: 20, zoomControl: false });
@@ -35,7 +35,21 @@ function updateZoomButtons() {
 map.on("zoomend", updateZoomButtons);
 updateZoomButtons();
 
-const { colorGroups, listEntries } = renderPois(map, pois, { mapHeight, iconSize: [32, 32] });
+// --- chunk count ---
+
+const chunkCountValue = document.getElementById("chunk-count-value") as HTMLElement;
+chunkCountValue.textContent = String(pois.filter((poi) => poi.type === "chunk").length);
+
+// --- mouse coordinates ---
+
+const mouseCoords = document.getElementById("mouse-coords") as HTMLElement;
+
+map.on("mousemove", (event: L.LeafletMouseEvent) => {
+  const { x, y } = fromLatLng(mapHeight, event.latlng.lat, event.latlng.lng);
+  mouseCoords.textContent = `X: ${Math.round(x)} Y: ${Math.round(y)}`;
+});
+
+const { colorGroups, listEntries } = renderPois(map, pois, { mapHeight });
 
 // --- POI list panel ---
 

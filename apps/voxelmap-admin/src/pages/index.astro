@@ -60,6 +60,13 @@ const pois = await listPois();
 
       .hud-button-green:hover { background: #113311; }
 
+      .hud-button-blue {
+        border-color: #5555ff;
+        color: #7d7dff;
+      }
+
+      .hud-button-blue:hover { background: #11113a; }
+
       .hud-panel {
         position: fixed;
         top: 60px;
@@ -203,7 +210,6 @@ const pois = await listPois();
         display: flex;
         justify-content: flex-end;
         gap: 8px;
-        margin-top: 12px;
       }
 
       .dialog-status {
@@ -213,6 +219,40 @@ const pois = await listPois();
       }
       .dialog-status.error { color: #ff5555; }
       .dialog-status.success { color: #55ff55; }
+
+      .hud-button-red {
+        border-color: #ff5555;
+        color: #ff5555;
+      }
+      .hud-button-red:hover { background: #3a1111; }
+      .hud-button-red.armed { background: #ff5555; color: #000; }
+
+      .dialog-actions-split {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 12px;
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 60px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #000;
+        border: 2px solid #fff;
+        color: #fff;
+        font-family: "Minecraft", monospace;
+        font-size: 13px;
+        padding: 8px 14px;
+        z-index: 3000;
+      }
+      .toast-success { border-color: #55ff55; }
+      .toast-error { border-color: #ff5555; color: #ff5555; }
+
+      .leaflet-marker-icon.poi-marker-icon,
+      .leaflet-interactive {
+        cursor: grab;
+      }
     </style>
   </head>
   <body>
@@ -234,13 +274,15 @@ const pois = await listPois();
       <button id="zoom-fit" class="hud-button" aria-label="Fit whole map">Fit</button>
       <button id="zoom-in" class="hud-button" aria-label="Zoom in">+</button>
       <button id="add-poi" class="hud-button hud-button-green" aria-label="Add POI">+ POI</button>
+      <button id="deploy" class="hud-button hud-button-blue" aria-label="Deploy">Deploy</button>
       <button id="logout" class="hud-button" aria-label="Log out">Logout</button>
     </div>
 
     <dialog id="add-poi-dialog">
-      <h2 class="minecraft-green">Add POI</h2>
+      <h2 id="dialog-title" class="minecraft-green">Add POI</h2>
       <div id="dialog-status" class="dialog-status"></div>
       <form id="add-poi-form">
+        <input id="poi-id" name="id" type="hidden" />
         <div class="dialog-field">
           <label for="poi-title">Title</label>
           <input id="poi-title" name="title" type="text" required />
@@ -253,9 +295,20 @@ const pois = await listPois();
           <label for="poi-color">Color</label>
           <input id="poi-color" name="color" type="text" placeholder="red" />
         </div>
-        <div class="dialog-checkbox">
-          <input id="poi-chunk" name="chunk" type="checkbox" />
-          <label for="poi-chunk">Chunk (16x16, red cross)</label>
+        <div class="dialog-field">
+          <label>Type</label>
+          <div class="dialog-checkbox">
+            <input id="poi-type-none" name="poiType" type="radio" value="" checked />
+            <label for="poi-type-none">None (hidden by default)</label>
+          </div>
+          <div class="dialog-checkbox">
+            <input id="poi-type-startup" name="poiType" type="radio" value="startup" />
+            <label for="poi-type-startup">Startup (shown by default)</label>
+          </div>
+          <div class="dialog-checkbox">
+            <input id="poi-type-chunk" name="poiType" type="radio" value="chunk" />
+            <label for="poi-type-chunk">Chunk (16x16, red cross)</label>
+          </div>
         </div>
         <div class="dialog-checkbox">
           <input id="poi-zone" name="zone" type="checkbox" />
@@ -296,9 +349,12 @@ const pois = await listPois();
           </div>
         </div>
 
-        <div class="dialog-actions">
-          <button type="button" id="dialog-cancel" class="hud-button">Cancel</button>
-          <button type="submit" class="hud-button hud-button-green">Add</button>
+        <div class="dialog-actions-split">
+          <button type="button" id="dialog-delete" class="hud-button hud-button-red" hidden>Delete</button>
+          <div class="dialog-actions">
+            <button type="button" id="dialog-cancel" class="hud-button">Cancel</button>
+            <button type="submit" id="dialog-submit" class="hud-button hud-button-green">Add</button>
+          </div>
         </div>
       </form>
     </dialog>

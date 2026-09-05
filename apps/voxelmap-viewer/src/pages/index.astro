@@ -26,6 +26,23 @@
         white-space: nowrap;
       }
 
+      .hud-chunk-count {
+        top: 60px;
+        padding: 6px 18px;
+        font-size: 32px;
+        white-space: nowrap;
+      }
+
+      .hud-coords {
+        left: 12px;
+        bottom: 12px;
+        transform: none;
+        padding: 4px 10px;
+        font-size: 13px;
+        color: #fff;
+        white-space: nowrap;
+      }
+
       .hud-toolbar {
         bottom: 12px;
         display: flex;
@@ -107,6 +124,8 @@
       .poi-marker-icon {
         background: var(--poi-color, #f00);
         position: relative;
+        /* fully opaque + 0 blur: a hard offset copy of the stepped clip-path, not a translucent smooth-alpha blob */
+        filter: drop-shadow(2px 2px 0 #000);
         clip-path: polygon(
           12px 0px, 12px 1px, 9px 1px, 9px 2px, 7px 2px, 7px 3px, 6px 3px, 6px 4px, 5px 4px, 5px 5px, 4px 5px, 4px 6px, 3px 6px, 3px 7px, 2px 7px, 2px 8px, 2px 9px, 1px 9px, 1px 10px, 1px 11px, 1px 12px, 0px 12px, 0px 13px, 0px 14px, 0px 15px, 0px 16px, 0px 17px, 0px 18px, 0px 19px, 0px 20px,
           1px 20px, 1px 21px, 1px 22px, 1px 23px, 2px 23px, 2px 24px, 2px 25px, 3px 25px, 3px 26px, 4px 26px, 4px 27px, 5px 27px, 5px 28px, 6px 28px, 6px 29px, 7px 29px, 7px 30px, 9px 30px, 9px 31px, 12px 31px, 12px 32px, 20px 32px, 20px 31px, 23px 31px, 23px 30px, 25px 30px, 25px 29px, 26px 29px, 26px 28px, 27px 28px, 27px 27px, 28px 27px, 28px 26px, 29px 26px, 29px 25px, 30px 25px, 30px 24px, 30px 23px, 31px 23px, 31px 22px, 31px 21px, 31px 20px, 32px 20px, 32px 19px, 32px 18px, 32px 17px, 32px 16px, 32px 15px, 32px 14px, 32px 13px, 32px 12px, 31px 12px, 31px 11px, 31px 10px, 31px 9px, 30px 9px, 30px 8px, 30px 7px, 29px 7px, 29px 6px, 28px 6px, 28px 5px, 27px 5px, 27px 4px, 26px 4px, 26px 3px, 25px 3px, 25px 2px, 23px 2px, 23px 1px, 20px 1px, 20px 0px
@@ -118,7 +137,10 @@
         content: "";
         position: absolute;
         inset: 0;
-        background: rgba(255, 255, 255, 0.5);
+        /* dithered checker fakes translucency with hard on/off pixels instead of a smooth alpha blend */
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='2' height='2'%3E%3Crect width='1' height='1' fill='%23fff'/%3E%3Crect x='1' y='1' width='1' height='1' fill='%23fff'/%3E%3C/svg%3E");
+        background-size: 2px 2px;
+        image-rendering: pixelated;
         clip-path: polygon(
           13px 4px, 13px 5px, 10px 5px, 10px 6px, 9px 6px, 9px 7px, 8px 7px, 8px 8px, 7px 8px, 7px 9px, 6px 9px, 6px 10px, 5px 10px, 5px 11px, 5px 12px, 4px 12px, 4px 13px, 4px 14px, 4px 15px, 4px 16px, 4px 17px, 4px 18px, 4px 19px, 5px 19px, 5px 20px, 5px 21px, 5px 22px, 6px 22px, 6px 23px, 7px 23px, 7px 24px, 8px 24px, 8px 25px, 9px 25px, 9px 26px, 10px 26px, 10px 27px, 13px 27px, 13px 28px, 19px 28px, 19px 27px, 22px 27px, 22px 26px, 23px 26px, 23px 25px, 24px 25px, 24px 24px, 25px 24px, 25px 23px, 26px 23px, 26px 22px, 27px 22px, 27px 21px, 27px 20px, 27px 19px, 28px 19px, 28px 18px, 28px 17px, 28px 16px, 28px 15px, 28px 14px, 28px 13px, 27px 13px, 27px 12px, 27px 11px, 27px 10px, 26px 10px, 26px 9px, 25px 9px, 25px 8px, 24px 8px, 24px 7px, 23px 7px, 23px 6px, 22px 6px, 22px 5px, 19px 5px, 19px 4px
         );
@@ -172,6 +194,13 @@
       <span class="minecraft-white">&nbsp;/&nbsp;</span>
       <span class="minecraft-green">ZEVENT 2026</span>
     </div>
+
+    <div class="hud-bar hud-chunk-count">
+      <span id="chunk-count-value" class="minecraft-red">0</span>
+      <span class="minecraft-green">&nbsp;CHUNKS</span>
+    </div>
+
+    <div id="mouse-coords" class="hud-bar hud-coords">X: -- Y: --</div>
 
     <div class="hud-bar hud-toolbar">
       <button id="zoom-out" class="hud-button" aria-label="Zoom out">-</button>

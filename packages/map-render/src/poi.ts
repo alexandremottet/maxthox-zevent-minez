@@ -5,11 +5,14 @@ interface PointOfInterestBase {
   /** any CSS color, e.g. "red", "blue", "#3498db". Defaults to red. */
   color?: string;
   /**
-   * defaults to none. "chunk" draws a red cross instead of the shine fill.
-   * On a point POI, (x, y) is treated as the chunk's origin corner and
-   * expanded to a 16x16 block zone.
+   * defaults to none.
+   * - "chunk" draws a red cross instead of the shine fill. On a point POI,
+   *   (x, y) is treated as the chunk's origin corner and expanded to a 16x16
+   *   block zone.
+   * - "startup" points are shown by default; other points aren't (zones and
+   *   chunks are always shown regardless of type).
    */
-  type?: "chunk";
+  type?: "chunk" | "startup";
 }
 
 export interface PointPointOfInterest extends PointOfInterestBase {

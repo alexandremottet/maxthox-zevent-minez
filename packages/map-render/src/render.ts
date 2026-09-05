@@ -16,6 +16,9 @@ export const CHUNK_SIZE = 16;
 const DEFAULT_POI_COLOR = "red";
 const SHINE_GRADIENT_ID = "poi-shine-gradient";
 const CROSS_STEPS = 16;
+// below this many pixels of total mouse movement, a rectangle press+release
+// counts as a click rather than a drag (mirrors Leaflet's own marker behavior)
+const DRAG_CLICK_THRESHOLD_PX = 3;
 
 // lat=0 is the screen's bottom edge (north-up convention), but image pixel y=0
 // means "top row of the image", so the y axis has to be flipped
@@ -137,8 +140,7 @@ function drawZone(
   corner2: L.LatLngTuple,
   color: string,
   isChunk: boolean,
-  popupContent: HTMLElement | undefined,
-): void {
+): L.Rectangle {
   // fill:false would leave only the 2px border clickable (SVG doesn't
   // hit-test a fill:none shape's interior), so keep an invisible fill instead
   const rectangle = L.rectangle([corner1, corner2], {
@@ -147,13 +149,70 @@ function drawZone(
     fillColor: isChunk ? "#000" : `url(#${SHINE_GRADIENT_ID})`,
     fillOpacity: isChunk ? 0 : 1,
   }).addTo(target);
-  if (popupContent) rectangle.bindPopup(popupContent);
 
   if (isChunk) {
     drawChunkCross(target, corner1, corner2);
   } else {
     ensureShineGradient(map);
   }
+
+  return rectangle;
+}
+
+// Leaflet has no built-in draggable rectangle; translate both corners
+// together by the mouse delta, live, then report the final corners on release.
+// A press+release under DRAG_CLICK_THRESHOLD_PX counts as a click instead.
+function makeRectangleDraggable(
+  map: L.Map,
+  rectangle: L.Rectangle,
+  corner1: L.LatLngTuple,
+  corner2: L.LatLngTuple,
+  onDrop: (corner1: L.LatLngTuple, corner2: L.LatLngTuple) => void,
+  onClick: () => void,
+): void {
+  let dragging = false;
+  let start: L.LatLng | null = null;
+  let startPoint: L.Point | null = null;
+  let moved = 0;
+
+  rectangle.on("mousedown", (event: L.LeafletMouseEvent) => {
+    dragging = true;
+    start = event.latlng;
+    startPoint = event.containerPoint;
+    moved = 0;
+    map.dragging.disable();
+    L.DomEvent.stop(event);
+  });
+
+  map.on("mousemove", (event: L.LeafletMouseEvent) => {
+    if (!dragging || !start || !startPoint) return;
+    moved = Math.max(moved, event.containerPoint.distanceTo(startPoint));
+    const dLat = event.latlng.lat - start.lat;
+    const dLng = event.latlng.lng - start.lng;
+    rectangle.setBounds([
+      [corner1[0] + dLat, corner1[1] + dLng],
+      [corner2[0] + dLat, corner2[1] + dLng],
+    ]);
+  });
+
+  map.on("mouseup", (event: L.LeafletMouseEvent) => {
+    if (!dragging || !start) return;
+    dragging = false;
+    map.dragging.enable();
+
+    if (moved < DRAG_CLICK_THRESHOLD_PX) {
+      onClick();
+      return;
+    }
+
+    const dLat = event.latlng.lat - start.lat;
+    const dLng = event.latlng.lng - start.lng;
+    const newCorner1: L.LatLngTuple = [corner1[0] + dLat, corner1[1] + dLng];
+    const newCorner2: L.LatLngTuple = [corner2[0] + dLat, corner2[1] + dLng];
+    corner1 = newCorner1;
+    corner2 = newCorner2;
+    onDrop(newCorner1, newCorner2);
+  });
 }
 
 export interface ListEntry {
@@ -167,15 +226,33 @@ export interface RenderResult {
   listEntries: ListEntry[];
 }
 
-export interface RenderOptions {
+export interface RenderOptions<T extends PointOfInterest> {
   mapHeight: number;
   defaultColor?: string;
   iconSize?: L.PointTuple;
+  /** defaults to 1.5x iconSize — how "startup" points stand out from the rest */
+  startupIconSize?: L.PointTuple;
+  /** if provided, clicking a POI calls this instead of showing the read-only popup */
+  onClick?: (poi: T) => void;
+  /** if provided, POIs become draggable; dropping one calls this with its new coordinates */
+  onMove?: (poi: T, coords: Partial<Record<"x" | "y" | "x1" | "y1" | "x2" | "y2", number>>) => void;
 }
 
-export function renderPois(map: L.Map, pois: PointOfInterest[], options: RenderOptions): RenderResult {
-  const { mapHeight, defaultColor = DEFAULT_POI_COLOR, iconSize = [12, 12] } = options;
+export function renderPois<T extends PointOfInterest>(
+  map: L.Map,
+  pois: T[],
+  options: RenderOptions<T>,
+): RenderResult {
+  const {
+    mapHeight,
+    defaultColor = DEFAULT_POI_COLOR,
+    iconSize = [4, 4],
+    startupIconSize = [8, 8],
+    onClick,
+    onMove,
+  } = options;
   const poiIcon = L.divIcon({ className: "poi-marker-icon", iconSize });
+  const startupIcon = L.divIcon({ className: "poi-marker-icon", iconSize: startupIconSize });
 
   // one LayerGroup per POI color, so a color filter panel can show/hide a
   // whole color's worth of markers/zones at once
@@ -192,27 +269,76 @@ export function renderPois(map: L.Map, pois: PointOfInterest[], options: RenderO
   const listEntries: ListEntry[] = [];
 
   for (const poi of pois) {
-    const popupContent = poi.title ? createPopupContent(poi.title, poi.description) : undefined;
+    const isChunk = poi.type === "chunk";
     const color = poi.color ?? defaultColor;
     const group = getColorGroup(color);
-    const isChunk = poi.type === "chunk";
     let center: L.LatLngTuple;
+
+    const bindInteraction = (layer: L.Layer) => {
+      if (onClick) {
+        layer.on("click", () => onClick(poi));
+      } else if (poi.title) {
+        layer.bindPopup(createPopupContent(poi.title, poi.description));
+      }
+    };
 
     if (isZone(poi)) {
       const corner1 = toLatLng(mapHeight, poi.x1, poi.y1);
       const corner2 = toLatLng(mapHeight, poi.x2, poi.y2);
-      drawZone(map, group, corner1, corner2, color, isChunk, popupContent);
+      const rectangle = drawZone(map, group, corner1, corner2, color, isChunk);
+      bindInteraction(rectangle);
+      if (onMove) {
+        makeRectangleDraggable(
+          map,
+          rectangle,
+          corner1,
+          corner2,
+          (c1, c2) => {
+            const w1 = fromLatLng(mapHeight, c1[0], c1[1]);
+            const w2 = fromLatLng(mapHeight, c2[0], c2[1]);
+            onMove(poi, {
+              x1: Math.round(w1.x),
+              y1: Math.round(w1.y),
+              x2: Math.round(w2.x),
+              y2: Math.round(w2.y),
+            });
+          },
+          () => onClick?.(poi),
+        );
+      }
       center = [(corner1[0] + corner2[0]) / 2, (corner1[1] + corner2[1]) / 2];
     } else if (isChunk) {
       // (x, y) is the chunk's origin corner; expand to the full 16x16 block zone
       const corner1 = toLatLng(mapHeight, poi.x, poi.y);
       const corner2 = toLatLng(mapHeight, poi.x + CHUNK_SIZE, poi.y + CHUNK_SIZE);
-      drawZone(map, group, corner1, corner2, color, true, popupContent);
+      const rectangle = drawZone(map, group, corner1, corner2, color, true);
+      bindInteraction(rectangle);
+      if (onMove) {
+        makeRectangleDraggable(
+          map,
+          rectangle,
+          corner1,
+          corner2,
+          (c1) => {
+            const w1 = fromLatLng(mapHeight, c1[0], c1[1]);
+            onMove(poi, { x: Math.round(w1.x), y: Math.round(w1.y) });
+          },
+          () => onClick?.(poi),
+        );
+      }
       center = [(corner1[0] + corner2[0]) / 2, (corner1[1] + corner2[1]) / 2];
     } else {
       center = toLatLng(mapHeight, poi.x, poi.y);
-      const marker = L.marker(center, { icon: poiIcon }).addTo(group);
-      if (popupContent) marker.bindPopup(popupContent);
+      const icon = poi.type === "startup" ? startupIcon : poiIcon;
+      const marker = L.marker(center, { icon, draggable: !!onMove }).addTo(group);
+      bindInteraction(marker);
+      if (onMove) {
+        marker.on("dragend", () => {
+          const latlng = marker.getLatLng();
+          const world = fromLatLng(mapHeight, latlng.lat, latlng.lng);
+          onMove(poi, { x: Math.round(world.x), y: Math.round(world.y) });
+        });
+      }
       const el = marker.getElement();
       el?.style.setProperty("border-color", color);
       el?.style.setProperty("--poi-color", color);
