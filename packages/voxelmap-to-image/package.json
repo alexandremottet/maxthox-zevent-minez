@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "tsx src/index.ts",
-    "map": "tsx src/index.ts --input data/overworld --output out/map.png --scale 16",
+    "map": "tsx src/index.ts --input data/overworld --output out --scale 16",
     "build": "tsc"
   },
   "dependencies": {

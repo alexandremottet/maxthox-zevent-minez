@@ -1,18 +1,12 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "@south-paw/typeface-minecraft";
-import { renderPois, fromLatLng, addMapWash, mapDataUrl, mapHeight, mapWidth, pois } from "map-render";
+import { renderPois, fromLatLng, setupMapImage, mapQuadrants, pois } from "map-render";
 
 // permissive range so getBoundsZoom below isn't clamped to Leaflet's default 0..18
 const map = L.map("map", { crs: L.CRS.Simple, minZoom: -20, maxZoom: 20, zoomControl: false });
 
-const bounds: L.LatLngBoundsExpression = [
-  [0, 0],
-  [mapHeight, mapWidth],
-];
-
-L.imageOverlay(mapDataUrl, bounds).addTo(map);
-addMapWash(map, bounds);
+const bounds = setupMapImage(map, mapQuadrants);
 
 // can't zoom out past seeing the whole map, can zoom in up to 8x beyond that
 const fitZoom = map.getBoundsZoom(bounds, true);
@@ -46,11 +40,11 @@ chunkCountValue.textContent = String(pois.filter((poi) => poi.type === "chunk").
 const mouseCoords = document.getElementById("mouse-coords") as HTMLElement;
 
 map.on("mousemove", (event: L.LeafletMouseEvent) => {
-  const { x, y } = fromLatLng(mapHeight, event.latlng.lat, event.latlng.lng);
+  const { x, y } = fromLatLng(event.latlng.lat, event.latlng.lng);
   mouseCoords.textContent = `X: ${Math.round(x)} Y: ${Math.round(y)}`;
 });
 
-const { colorGroups, listEntries } = renderPois(map, pois, { mapHeight });
+const { colorGroups, listEntries } = renderPois(map, pois, {});
 
 // --- POI list panel ---
 

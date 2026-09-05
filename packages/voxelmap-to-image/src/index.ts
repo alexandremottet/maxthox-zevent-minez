@@ -1,4 +1,4 @@
-import { readdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import AdmZip from "adm-zip";
 import { PNG } from "pngjs";
@@ -23,12 +23,12 @@ const DEFAULT_SCALE = 4;
 
 interface Options {
   inputDir: string;
-  output: string;
+  outputDir: string;
   scale: number;
 }
 
 function parseArgs(argv: string[]): Options {
-  const opts: Partial<Options> = { output: "map.png", scale: DEFAULT_SCALE };
+  const opts: Partial<Options> = { outputDir: "out", scale: DEFAULT_SCALE };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     const value = argv[i + 1];
@@ -38,7 +38,7 @@ function parseArgs(argv: string[]): Options {
         i++;
         break;
       case "--output":
-        opts.output = value;
+        opts.outputDir = value;
         i++;
         break;
       case "--scale":
@@ -194,11 +194,34 @@ function listRegionFiles(dir: string): RegionFile[] {
   return files;
 }
 
-function stitchRegions(files: RegionFile[]): { width: number; height: number; rgba: Buffer } {
-  const minX = Math.min(...files.map((f) => f.x));
-  const maxX = Math.max(...files.map((f) => f.x));
-  const minZ = Math.min(...files.map((f) => f.z));
-  const maxZ = Math.max(...files.map((f) => f.z));
+type QuadrantKey = "pxpy" | "nxpy" | "pxny" | "nxny";
+
+const QUADRANTS: { key: QuadrantKey; positiveX: boolean; positiveZ: boolean }[] = [
+  { key: "pxpy", positiveX: true, positiveZ: true },
+  { key: "nxpy", positiveX: false, positiveZ: true },
+  { key: "pxny", positiveX: true, positiveZ: false },
+  { key: "nxny", positiveX: false, positiveZ: false },
+];
+
+function quadrantOf(x: number, z: number): QuadrantKey {
+  if (x >= 0 && z >= 0) return "pxpy";
+  if (x < 0 && z >= 0) return "nxpy";
+  if (x >= 0 && z < 0) return "pxny";
+  return "nxny";
+}
+
+// the near edge (region 0, or -1 on the negative side) is forced rather than
+// taken from the data, so world (0, 0) always lands at a fixed, known pixel —
+// no origin constant needed by the consumers of the generated image
+function stitchQuadrant(
+  files: RegionFile[],
+  positiveX: boolean,
+  positiveZ: boolean,
+): { width: number; height: number; rgba: Buffer } {
+  const minX = positiveX ? 0 : Math.min(...files.map((f) => f.x));
+  const maxX = positiveX ? Math.max(...files.map((f) => f.x)) : -1;
+  const minZ = positiveZ ? 0 : Math.min(...files.map((f) => f.z));
+  const maxZ = positiveZ ? Math.max(...files.map((f) => f.z)) : -1;
   const width = (maxX - minX + 1) * REGION_SIZE;
   const height = (maxZ - minZ + 1) * REGION_SIZE;
   const rgba = Buffer.alloc(width * height * 4);
@@ -248,10 +271,20 @@ function writePng(width: number, height: number, rgba: Buffer, outputPath: strin
 function main(): void {
   const opts = parseArgs(process.argv.slice(2));
   const files = listRegionFiles(opts.inputDir);
-  const stitched = stitchRegions(files);
-  const { width, height, rgba } = upscale(stitched.width, stitched.height, stitched.rgba, opts.scale);
-  writePng(width, height, rgba, opts.output);
-  console.log(`wrote ${opts.output} (${width}x${height}, ${files.length} regions, x${opts.scale})`);
+  mkdirSync(opts.outputDir, { recursive: true });
+
+  for (const { key, positiveX, positiveZ } of QUADRANTS) {
+    const quadrantFiles = files.filter((f) => quadrantOf(f.x, f.z) === key);
+    if (quadrantFiles.length === 0) {
+      console.log(`skipping ${key}: no region files`);
+      continue;
+    }
+    const stitched = stitchQuadrant(quadrantFiles, positiveX, positiveZ);
+    const { width, height, rgba } = upscale(stitched.width, stitched.height, stitched.rgba, opts.scale);
+    const outPath = join(opts.outputDir, `map-${key}.png`);
+    writePng(width, height, rgba, outPath);
+    console.log(`wrote ${outPath} (${width}x${height}, ${quadrantFiles.length} regions, x${opts.scale})`);
+  }
 }
 
 main();

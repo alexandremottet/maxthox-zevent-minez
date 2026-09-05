@@ -5,11 +5,6 @@ import { isZone, type PointOfInterest } from "./poi.ts";
 // 1 world block covers MAP_SCALE x MAP_SCALE pixels in the embedded image
 export const MAP_SCALE = 16;
 
-// poi.json coordinates are Minecraft world x/z; world (0, 0) sits at this
-// pixel in the generated map image (measured at MAP_SCALE)
-export const WORLD_ORIGIN_PIXEL_X = 4091;
-export const WORLD_ORIGIN_PIXEL_Y = 8200;
-
 // one Minecraft chunk = 16x16 blocks
 export const CHUNK_SIZE = 16;
 
@@ -20,22 +15,17 @@ const CROSS_STEPS = 16;
 // counts as a click rather than a drag (mirrors Leaflet's own marker behavior)
 const DRAG_CLICK_THRESHOLD_PX = 3;
 
-// lat=0 is the screen's bottom edge (north-up convention), but image pixel y=0
-// means "top row of the image", so the y axis has to be flipped
-export function toLatLng(mapHeight: number, worldX: number, worldZ: number): L.LatLngTuple {
-  const pixelX = worldX * MAP_SCALE + WORLD_ORIGIN_PIXEL_X;
-  const pixelY = worldZ * MAP_SCALE + WORLD_ORIGIN_PIXEL_Y;
-  return [mapHeight - pixelY, pixelX];
+// world (0, 0) is a fixed point, not a computed offset: the 4 quadrant images
+// (see setupMapImage) are each pinned to it by construction. Minecraft's +Z
+// (this codebase's "y") is south, which is downward on screen, i.e. negative
+// lat — a plain negation, no per-map bounds needed for the flip.
+export function toLatLng(worldX: number, worldZ: number): L.LatLngTuple {
+  return [-worldZ * MAP_SCALE, worldX * MAP_SCALE];
 }
 
 // inverse of toLatLng — used by the admin to turn a map click back into world x/z
-export function fromLatLng(mapHeight: number, lat: number, lng: number): { x: number; y: number } {
-  const pixelX = lng;
-  const pixelY = mapHeight - lat;
-  return {
-    x: (pixelX - WORLD_ORIGIN_PIXEL_X) / MAP_SCALE,
-    y: (pixelY - WORLD_ORIGIN_PIXEL_Y) / MAP_SCALE,
-  };
+export function fromLatLng(lat: number, lng: number): { x: number; y: number } {
+  return { x: lng / MAP_SCALE, y: -lat / MAP_SCALE };
 }
 
 export function createPopupContent(title: string, description?: string): HTMLElement {
@@ -233,6 +223,61 @@ export function addMapWash(map: L.Map, bounds: L.LatLngBoundsExpression): void {
   L.rectangle(bounds, { stroke: false, fillColor: "#fff", fillOpacity: 0.12, interactive: false }).addTo(map);
 }
 
+export interface MapQuadrant {
+  width: number;
+  height: number;
+  dataUrl: string;
+}
+
+export interface MapQuadrants {
+  pxpy: MapQuadrant | null;
+  nxpy: MapQuadrant | null;
+  pxny: MapQuadrant | null;
+  nxny: MapQuadrant | null;
+}
+
+// each quadrant is pinned to world (0, 0) by construction (see voxelmap-to-image's
+// stitchQuadrant), so its Leaflet bounds follow directly from its own pixel size
+function quadrantBounds(key: keyof MapQuadrants, { width, height }: MapQuadrant): L.LatLngBoundsExpression {
+  switch (key) {
+    case "pxpy":
+      return [
+        [-height, 0],
+        [0, width],
+      ];
+    case "nxpy":
+      return [
+        [-height, -width],
+        [0, 0],
+      ];
+    case "pxny":
+      return [
+        [0, 0],
+        [height, width],
+      ];
+    case "nxny":
+      return [
+        [0, -width],
+        [height, 0],
+      ];
+  }
+}
+
+// places whichever of the 4 quadrant images exist, adds the light wash over
+// their combined area, and returns that combined area for fitBounds/getBoundsZoom
+export function setupMapImage(map: L.Map, quadrants: MapQuadrants): L.LatLngBounds {
+  const combined = L.latLngBounds([]);
+  for (const key of ["pxpy", "nxpy", "pxny", "nxny"] as const) {
+    const quadrant = quadrants[key];
+    if (!quadrant) continue;
+    const bounds = quadrantBounds(key, quadrant);
+    L.imageOverlay(quadrant.dataUrl, bounds).addTo(map);
+    combined.extend(bounds);
+  }
+  addMapWash(map, combined);
+  return combined;
+}
+
 export interface ListEntry {
   title: string;
   color: string;
@@ -245,7 +290,6 @@ export interface RenderResult {
 }
 
 export interface RenderOptions<T extends PointOfInterest> {
-  mapHeight: number;
   defaultColor?: string;
   iconSize?: L.PointTuple;
   /** defaults to 1.5x iconSize — how "startup" points stand out from the rest */
@@ -262,7 +306,6 @@ export function renderPois<T extends PointOfInterest>(
   options: RenderOptions<T>,
 ): RenderResult {
   const {
-    mapHeight,
     defaultColor = DEFAULT_POI_COLOR,
     iconSize = [15, 15],
     startupIconSize = [20,20],
@@ -317,8 +360,8 @@ export function renderPois<T extends PointOfInterest>(
     };
 
     if (isZone(poi)) {
-      const corner1 = toLatLng(mapHeight, poi.x1, poi.y1);
-      const corner2 = toLatLng(mapHeight, poi.x2, poi.y2);
+      const corner1 = toLatLng(poi.x1, poi.y1);
+      const corner2 = toLatLng(poi.x2, poi.y2);
       const rectangle = drawZone(map, group, corner1, corner2, color, isChunk);
       bindInteraction(rectangle);
       if (onMove) {
@@ -328,8 +371,8 @@ export function renderPois<T extends PointOfInterest>(
           corner1,
           corner2,
           (c1, c2) => {
-            const w1 = fromLatLng(mapHeight, c1[0], c1[1]);
-            const w2 = fromLatLng(mapHeight, c2[0], c2[1]);
+            const w1 = fromLatLng(c1[0], c1[1]);
+            const w2 = fromLatLng(c2[0], c2[1]);
             onMove(poi, {
               x1: Math.round(w1.x),
               y1: Math.round(w1.y),
@@ -343,8 +386,8 @@ export function renderPois<T extends PointOfInterest>(
       center = [(corner1[0] + corner2[0]) / 2, (corner1[1] + corner2[1]) / 2];
     } else if (isChunk) {
       // (x, y) is the chunk's origin corner; expand to the full 16x16 block zone
-      const corner1 = toLatLng(mapHeight, poi.x, poi.y);
-      const corner2 = toLatLng(mapHeight, poi.x + CHUNK_SIZE, poi.y + CHUNK_SIZE);
+      const corner1 = toLatLng(poi.x, poi.y);
+      const corner2 = toLatLng(poi.x + CHUNK_SIZE, poi.y + CHUNK_SIZE);
       const rectangle = drawZone(map, group, corner1, corner2, color, true);
       bindInteraction(rectangle);
       if (onMove) {
@@ -354,7 +397,7 @@ export function renderPois<T extends PointOfInterest>(
           corner1,
           corner2,
           (c1) => {
-            const w1 = fromLatLng(mapHeight, c1[0], c1[1]);
+            const w1 = fromLatLng(c1[0], c1[1]);
             onMove(poi, { x: Math.round(w1.x), y: Math.round(w1.y) });
           },
           () => onClick?.(poi),
@@ -362,14 +405,14 @@ export function renderPois<T extends PointOfInterest>(
       }
       center = [(corner1[0] + corner2[0]) / 2, (corner1[1] + corner2[1]) / 2];
     } else {
-      center = toLatLng(mapHeight, poi.x, poi.y);
+      center = toLatLng(poi.x, poi.y);
       const icon = poi.type === "startup" ? startupIcon : poiIcon;
       const marker = L.marker(center, { icon, draggable: !!onMove }).addTo(group);
       bindInteraction(marker);
       if (onMove) {
         marker.on("dragend", () => {
           const latlng = marker.getLatLng();
-          const world = fromLatLng(mapHeight, latlng.lat, latlng.lng);
+          const world = fromLatLng(latlng.lat, latlng.lng);
           onMove(poi, { x: Math.round(world.x), y: Math.round(world.y) });
         });
       }

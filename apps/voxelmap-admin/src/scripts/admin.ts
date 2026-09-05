@@ -1,7 +1,7 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "@south-paw/typeface-minecraft";
-import { renderPois, fromLatLng, isZone, addMapWash, mapDataUrl, mapHeight, mapWidth } from "map-render";
+import { renderPois, fromLatLng, isZone, setupMapImage, mapQuadrants } from "map-render";
 import { authClient } from "../lib/auth-client.ts";
 import type { AdminPoi } from "../lib/poi-db.ts";
 
@@ -14,13 +14,7 @@ declare global {
 // permissive range so getBoundsZoom below isn't clamped to Leaflet's default 0..18
 const map = L.map("map", { crs: L.CRS.Simple, minZoom: -40, maxZoom: 20, zoomControl: false });
 
-const bounds: L.LatLngBoundsExpression = [
-  [0, 0],
-  [mapHeight, mapWidth],
-];
-
-L.imageOverlay(mapDataUrl, bounds).addTo(map);
-addMapWash(map, bounds);
+const bounds = setupMapImage(map, mapQuadrants);
 
 const fitZoom = map.getBoundsZoom(bounds, true);
 map.setMinZoom(fitZoom);
@@ -187,7 +181,7 @@ let nextZoneCorner: 1 | 2 = 1;
 
 map.on("click", (event: L.LeafletMouseEvent) => {
   if (!dialog.open) return;
-  const { x, y } = fromLatLng(mapHeight, event.latlng.lat, event.latlng.lng);
+  const { x, y } = fromLatLng(event.latlng.lat, event.latlng.lng);
   const roundedX = Math.round(x);
   const roundedY = Math.round(y);
 
@@ -324,7 +318,6 @@ async function saveMovedPoi(poi: AdminPoi, coords: Record<string, number>): Prom
 }
 
 const { listEntries } = renderPois(map, window.__initialPois, {
-  mapHeight,
   onClick: openEditDialog,
   onMove: saveMovedPoi,
 });
