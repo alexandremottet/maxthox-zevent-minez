@@ -7,13 +7,13 @@ import { renderPois, fromLatLng, toLatLng, setupMapImage, mapQuadrants, pois } f
 // zoomAnimation off: the quadrant images are huge single <img> elements, and
 // animating the zoom means the browser rescales them every frame — jumping
 // straight to the new zoom instead is the cheap fix for the resulting lag
-const map = L.map("map", { crs: L.CRS.Simple, minZoom: -20, maxZoom: 20, zoomControl: false, zoomAnimation: false });
+const map = L.map("map", { crs: L.CRS.Simple, minZoom: -80, maxZoom: 20, zoomControl: false, zoomAnimation: false });
 
 const bounds = setupMapImage(map, mapQuadrants);
 
 // can't zoom out past seeing the whole map, can zoom in up to 8x beyond that
 const fitZoom = map.getBoundsZoom(bounds, true);
-map.setMinZoom(fitZoom);
+map.setMinZoom(fitZoom - 2);
 map.setMaxZoom(fitZoom + 2);
 
 // default camera is world (0, 0); once the visitor pans/zooms, remember that instead
