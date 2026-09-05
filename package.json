@@ -5,7 +5,8 @@
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "pnpm run -r build"
+    "build:map": "pnpm --filter voxelmap-to-image run map && pnpm --filter map-render run generate-map",
+    "build": "pnpm run build:map && pnpm run -r build"
   },
   "keywords": [],
   "author": "",
