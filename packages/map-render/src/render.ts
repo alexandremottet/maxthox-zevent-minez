@@ -351,7 +351,7 @@ export function renderPois<T extends PointOfInterest>(
       scaledMarkers.push({ marker, baseSize: poi.type === "startup" ? startupIconSize : iconSize, color });
     }
 
-    if (poi.title) {
+    if (poi.title && !isChunk) {
       listEntries.push({ title: poi.title, color, center });
     }
   }
