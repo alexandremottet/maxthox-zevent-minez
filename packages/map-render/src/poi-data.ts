@@ -396,5 +396,19 @@ export const pois: PointOfInterest[] = [
     "type": "chunk",
     "x": -16,
     "y": 160
+  },
+  {
+    "title": "Four à Pomme de Terre",
+    "color": "pink",
+    "x": 316,
+    "y": 84
+  },
+  {
+    "title": "Ferme à XP",
+    "description": "Ferme à XP au spawn",
+    "color": "gray",
+    "type": "startup",
+    "x": -30,
+    "y": 30
   }
 ];

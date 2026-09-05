@@ -33,11 +33,15 @@ function loadSavedCamera(): { lat: number; lng: number; zoom: number } | null {
   return null;
 }
 
+function pointAtOrigin(): void {
+  map.setView(toLatLng(0, 0), fitZoom);
+}
+
 const savedCamera = loadSavedCamera();
 if (savedCamera) {
   map.setView([savedCamera.lat, savedCamera.lng], savedCamera.zoom);
 } else {
-  map.setView(toLatLng(0, 0), fitZoom);
+  pointAtOrigin();
 }
 
 map.on("moveend zoomend", () => {
@@ -55,7 +59,7 @@ const zoomFitButton = document.getElementById("zoom-fit") as HTMLButtonElement;
 
 zoomInButton.addEventListener("click", () => map.zoomIn());
 zoomOutButton.addEventListener("click", () => map.zoomOut());
-zoomFitButton.addEventListener("click", () => map.fitBounds(bounds));
+zoomFitButton.addEventListener("click", pointAtOrigin);
 
 function updateZoomButtons() {
   zoomInButton.disabled = map.getZoom() >= map.getMaxZoom();
