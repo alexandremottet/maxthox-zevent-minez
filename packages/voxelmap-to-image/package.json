@@ -1,0 +1,21 @@
+{
+  "name": "voxelmap-to-image",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.16",
+    "pngjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.7",
+    "@types/node": "^22.10.2",
+    "@types/pngjs": "^6.0.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
