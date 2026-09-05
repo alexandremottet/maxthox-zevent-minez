@@ -1,7 +1,7 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "@south-paw/typeface-minecraft";
-import { renderPois, fromLatLng, setupMapImage, mapQuadrants, pois } from "map-render";
+import { renderPois, fromLatLng, toLatLng, setupMapImage, mapQuadrants, pois } from "map-render";
 
 // permissive range so getBoundsZoom below isn't clamped to Leaflet's default 0..18
 const map = L.map("map", { crs: L.CRS.Simple, minZoom: -20, maxZoom: 20, zoomControl: false });
@@ -12,7 +12,39 @@ const bounds = setupMapImage(map, mapQuadrants);
 const fitZoom = map.getBoundsZoom(bounds, true);
 map.setMinZoom(fitZoom);
 map.setMaxZoom(fitZoom + 2);
-map.fitBounds(bounds);
+
+// default camera is world (0, 0); once the visitor pans/zooms, remember that instead
+const CAMERA_STORAGE_KEY = "voxelmap-camera";
+
+function loadSavedCamera(): { lat: number; lng: number; zoom: number } | null {
+  try {
+    const raw = localStorage.getItem(CAMERA_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (typeof parsed.lat === "number" && typeof parsed.lng === "number" && typeof parsed.zoom === "number") {
+      return parsed;
+    }
+  } catch {
+    // localStorage unavailable (private mode, disabled) — fall back to the default view
+  }
+  return null;
+}
+
+const savedCamera = loadSavedCamera();
+if (savedCamera) {
+  map.setView([savedCamera.lat, savedCamera.lng], savedCamera.zoom);
+} else {
+  map.setView(toLatLng(0, 0), fitZoom);
+}
+
+map.on("moveend zoomend", () => {
+  const center = map.getCenter();
+  try {
+    localStorage.setItem(CAMERA_STORAGE_KEY, JSON.stringify({ lat: center.lat, lng: center.lng, zoom: map.getZoom() }));
+  } catch {
+    // ignore — nothing to persist to if storage is unavailable
+  }
+});
 
 const zoomInButton = document.getElementById("zoom-in") as HTMLButtonElement;
 const zoomOutButton = document.getElementById("zoom-out") as HTMLButtonElement;
