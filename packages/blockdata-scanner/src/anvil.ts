@@ -50,10 +50,21 @@ function decompress(payload: Buffer, compressionType: number): Buffer {
   }
 }
 
+// callers (chunk-scanner, blockdata-scanner) call this 1024 times in a row
+// for the same regionPath (once per local chunk) before moving to the next
+// region — a one-slot cache turns that into one disk read per region instead
+// of one per chunk, which is where nearly all of the scan time was going
+let cachedPath: string | undefined;
+let cachedBuffer: Buffer | undefined;
+
 // returns the root NBT compound for the chunk at region-local coordinates
 // (0-31, 0-31), or undefined if that chunk was never generated/saved
 export function loadChunkNbt(regionPath: string, localX: number, localZ: number): nbt.NBT | undefined {
-  const region = readFileSync(regionPath);
+  if (cachedPath !== regionPath) {
+    cachedPath = regionPath;
+    cachedBuffer = readFileSync(regionPath);
+  }
+  const region = cachedBuffer!;
   if (region.length < HEADER_SIZE) return undefined;
 
   const entryOffset = 4 * (localX + localZ * CHUNKS_PER_REGION_SIDE);

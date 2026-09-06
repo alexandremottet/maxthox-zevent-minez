@@ -4,12 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "scan": "tsx --env-file-if-exists=.env.local src/index.ts --input ../voxelmap-to-image/data/overworld"
+    "scan": "tsx --env-file-if-exists=.env.local src/index.ts --input ../voxelmap-to-image/save/minez.mathox1subs.fr/dimensions/minecraft/overworld/region"
   },
   "dependencies": {
+    "blockdata-scanner": "workspace:*",
     "map-render": "workspace:*",
-    "mongodb": "^7.6.0",
-    "voxelmap-to-image": "workspace:*"
+    "mongodb": "^7.6.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

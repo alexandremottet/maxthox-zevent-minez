@@ -1,6 +1,4 @@
 [
-  { "name": "done", "heightMin": -65, "heightMax": -58, "color": "#ff0000" },
-  { "name": "almost", "heightMin": -58, "heightMax": -48, "color": "#ffa500" },
-  { "name": "ongoing", "heightMin": -47, "heightMax": -15, "color": "#ffff00" },
-  { "name": "started", "heightMin": -14, "heightMax": 20, "color": "#0000FF" }
+  { "name": "done", "percentMin": 99, "percentMax": 100, "color": "#ff0000" },
+  { "name": "almost", "percentMin": 90, "percentMax": 99, "color": "#ffa500" }
 ]

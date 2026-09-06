@@ -19,10 +19,10 @@ const DEFAULT_POI_COLOR = "red";
 
 export interface ChunkLevel {
   name: string;
-  // chunk-scanner assigns a chunk to whichever level's [heightMin, heightMax]
-  // range contains that chunk's average surveyed-column height
-  heightMin: number;
-  heightMax: number;
+  // chunk-scanner assigns a chunk to whichever level's [percentMin, percentMax]
+  // range contains that chunk's emptiness percentage
+  percentMin: number;
+  percentMax: number;
   color: string;
 }
 

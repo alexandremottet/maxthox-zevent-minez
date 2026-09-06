@@ -1,39 +1,32 @@
-// Scans VoxelMap region data for chunks being dug out (a mining-event
-// challenge). For each chunk, computes the average recorded height across its
-// surveyed columns and matches it against the depth bands in
+// Scans the real WDL world save for chunks being dug out (a mining-event
+// challenge). For each chunk, computes the percentage of air blocks between
+// --min-y and --max-y and matches it against the emptiness bands in
 // ../map-render/src/levels.json, then syncs the result into the "pois"
 // MongoDB collection as type:"chunk" POIs, so dig progress shows up on the
 // map with the colors defined there.
 //
-//   MONGODB_URI=... tsx src/index.ts --input <dir containing x,z.zip region files>
-
+//   MONGODB_URI=... tsx src/index.ts --input <dir containing r.X.Z.mca region files> [--min-y -59] [--max-y 20]
 import { readFileSync } from "node:fs";
+import { availableParallelism } from "node:os";
 import { fileURLToPath } from "node:url";
+import { Worker } from "node:worker_threads";
+import { listRegionFiles, type RegionFile } from "blockdata-scanner/src/anvil.ts";
 import { MongoClient, type Document } from "mongodb";
 // type-only: map-render's barrel also pulls in Leaflet (browser-only), which
 // crashes in this Node CLI context, so import just the types (erased at
 // compile time, no runtime import) — real values (levels.json) are read
 // straight off disk below instead, bypassing that barrel entirely
 import type { PointOfInterest, PointPointOfInterest } from "map-render";
-import { BLOCKSTATEPOS, HEIGHTPOS, NO_DATA_HEIGHT, REGION_SIZE, listRegionFiles, loadRegion, shortPlane } from "voxelmap-to-image";
-
-// VoxelMap sometimes caches a column as height=-64 (world floor) with the
-// recorded surface block still "air" — never real terrain (a genuine surface
-// reading is never air), just a not-yet-scanned placeholder that happens to
-// slip past the NO_DATA_HEIGHT check. Left in, it drags never-visited chunks'
-// average height down into "done" purely by landing on the world floor.
-const AIR_BLOCK_NAME = /:(air|cave_air|void_air)\}$/;
 
 // one Minecraft chunk = 16x16 blocks
 const CHUNK_SIZE = 16;
-const CHUNKS_PER_REGION_SIDE = REGION_SIZE / CHUNK_SIZE;
 
 interface ChunkLevel {
   name: string;
-  // a chunk is assigned to whichever level's range contains the average
-  // height of its surveyed columns
-  heightMin: number;
-  heightMax: number;
+  // a chunk is assigned to whichever level's range contains its emptiness
+  // percentage (air blocks / total blocks) in [--min-y, --max-y]
+  percentMin: number;
+  percentMax: number;
   color: string;
 }
 
@@ -48,55 +41,39 @@ interface ScannedChunk {
   level: string;
 }
 
-function parseInputDir(argv: string[]): string {
-  for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === "--input") return argv[i + 1];
-  }
-  throw new Error("missing --input <directory containing x,z.zip region files>");
+function parseArgs(argv: string[]): { inputDir: string; minY: number; maxY: number } {
+  const get = (flag: string): string | undefined => {
+    const i = argv.indexOf(flag);
+    return i === -1 ? undefined : argv[i + 1];
+  };
+
+  const inputDir = get("--input");
+  if (!inputDir) throw new Error("missing --input <directory containing r.X.Z.mca region files>");
+
+  return { inputDir, minY: Number(get("--min-y") ?? -59), maxY: Number(get("--max-y") ?? 20) };
 }
 
-function findDugChunks(inputDir: string, levels: ChunkLevel[]): ScannedChunk[] {
-  const files = listRegionFiles(inputDir);
-  const found: ScannedChunk[] = [];
+function scanRegionsInWorker(regions: RegionFile[], levels: ChunkLevel[], minY: number, maxY: number): Promise<ScannedChunk[]> {
+  return new Promise((resolve, reject) => {
+    const worker = new Worker(fileURLToPath(new URL("./scan-worker.ts", import.meta.url)), {
+      workerData: { regions, levels, minY, maxY },
+    });
+    worker.once("message", (result: ScannedChunk[]) => resolve(result));
+    worker.once("error", reject);
+  });
+}
 
-  for (const file of files) {
-    const region = loadRegion(file.path);
-    const heights = shortPlane(region.data, HEIGHTPOS, true);
-    const blockstates = shortPlane(region.data, BLOCKSTATEPOS, false);
+// regions are fully independent of each other, so scanning is split across
+// one worker_thread per CPU core — decompressing+parsing NBT for thousands
+// of chunks is CPU-bound, this is where the real time goes (see scan-worker.ts)
+async function findDugChunks(inputDir: string, minY: number, maxY: number, levels: ChunkLevel[]): Promise<ScannedChunk[]> {
+  const regions = listRegionFiles(inputDir);
+  const workerCount = Math.max(1, Math.min(availableParallelism(), regions.length));
+  const slices: RegionFile[][] = Array.from({ length: workerCount }, () => []);
+  regions.forEach((region, i) => slices[i % workerCount].push(region));
 
-    for (let chunkRow = 0; chunkRow < CHUNKS_PER_REGION_SIDE; chunkRow++) {
-      for (let chunkCol = 0; chunkCol < CHUNKS_PER_REGION_SIDE; chunkCol++) {
-        let surveyed = 0;
-        let heightSum = 0;
-        for (let dz = 0; dz < CHUNK_SIZE; dz++) {
-          for (let dx = 0; dx < CHUNK_SIZE; dx++) {
-            const localX = chunkCol * CHUNK_SIZE + dx;
-            const localZ = chunkRow * CHUNK_SIZE + dz;
-            const index = localZ * REGION_SIZE + localX;
-            const height = heights[index];
-            if (height === NO_DATA_HEIGHT) continue;
-            const blockName = region.key.get(blockstates[index]) ?? "";
-            if (AIR_BLOCK_NAME.test(blockName)) continue;
-            surveyed++;
-            heightSum += height;
-          }
-        }
-        if (surveyed === 0) continue;
-
-        const averageHeight = heightSum / surveyed;
-        const matched = levels.find((level) => averageHeight >= level.heightMin && averageHeight <= level.heightMax);
-        if (!matched) continue;
-
-        found.push({
-          worldX: file.x * REGION_SIZE + chunkCol * CHUNK_SIZE,
-          worldZ: file.z * REGION_SIZE + chunkRow * CHUNK_SIZE,
-          level: matched.name,
-        });
-      }
-    }
-  }
-
-  return found;
+  const results = await Promise.all(slices.filter((slice) => slice.length > 0).map((slice) => scanRegionsInWorker(slice, levels, minY, maxY)));
+  return results.flat();
 }
 
 // an existing chunk POI "notes" this chunk if its recorded origin falls
@@ -114,13 +91,13 @@ async function main(): Promise<void> {
   if (!MONGODB_URI) throw new Error("missing required env var: MONGODB_URI");
 
   const levels = loadLevels();
-  const inputDir = parseInputDir(process.argv.slice(2));
-  const dugChunks = findDugChunks(inputDir, levels);
+  const { inputDir, minY, maxY } = parseArgs(process.argv.slice(2));
+  const dugChunks = await findDugChunks(inputDir, minY, maxY, levels);
 
   const byLevel = new Map<string, number>();
   for (const { level } of dugChunks) byLevel.set(level, (byLevel.get(level) ?? 0) + 1);
   const summary = levels.map((l) => `${l.name}=${byLevel.get(l.name) ?? 0}`).join(", ");
-  console.log(`found ${dugChunks.length} chunk(s): ${summary}`);
+  console.log(`found ${dugChunks.length} chunk(s) in Y[${minY}, ${maxY}]: ${summary}`);
 
   const client = new MongoClient(MONGODB_URI);
   await client.connect();

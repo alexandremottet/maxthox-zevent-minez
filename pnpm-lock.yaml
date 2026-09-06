@@ -288,15 +288,15 @@ importers:
 
   packages/chunk-scanner:
     dependencies:
+      blockdata-scanner:
+        specifier: workspace:*
+        version: link:../blockdata-scanner
       map-render:
         specifier: workspace:*
         version: link:../map-render
       mongodb:
         specifier: ^7.6.0
         version: 7.6.0
-      voxelmap-to-image:
-        specifier: workspace:*
-        version: link:../voxelmap-to-image
     devDependencies:
       '@types/node':
         specifier: ^22.10.2

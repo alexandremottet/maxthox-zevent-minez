@@ -29,8 +29,8 @@ const STEPS = [
   },
   {
     id: "chunk-scanner",
-    label: "Scan VoxelMap cache for dug chunks",
-    hint: "classifies chunks by levels.json, writes to MongoDB (needs MONGODB_URI)",
+    label: "Scan world save for dug chunks",
+    hint: "classifies chunks by emptiness % against levels.json, writes to MongoDB (needs MONGODB_URI)",
     order: 2,
     cmd: "pnpm --filter chunk-scanner run scan",
   },
