@@ -44,7 +44,7 @@ jobs:
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
 
-      - name: Scan world save for percent-dug data
+      - name: Scan for percent-dug data
         run: pnpm --filter blockdata-scanner run scan
 
       - uses: actions/setup-java@v4

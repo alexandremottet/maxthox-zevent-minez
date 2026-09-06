@@ -29,8 +29,8 @@ const STEPS = [
   },
   {
     id: "chunk-scanner",
-    label: "Scan VoxelMap cache for dug chunks",
-    hint: "classifies chunks by % of columns reaching depth-threshold against levels.json, writes to MongoDB (needs MONGODB_URI)",
+    label: "Scan for dug chunks",
+    hint: "classifies chunks against levels.json, writes to MongoDB (needs MONGODB_URI). Source: --source/PERCENT_SOURCE=voxelmap|wdl, default voxelmap",
     order: 2,
     cmd: "pnpm --filter chunk-scanner run scan",
   },
@@ -43,8 +43,8 @@ const STEPS = [
   },
   {
     id: "blockdata-scanner",
-    label: "Scan real world save for percent-dug data",
-    hint: "reads the WDL save's region files -> map-render/src/percent-data.ts",
+    label: "Scan for percent-dug data",
+    hint: "-> map-render/src/percent-data.ts. Source: --source/PERCENT_SOURCE=voxelmap|wdl, default voxelmap",
     order: 4,
     cmd: "pnpm --filter blockdata-scanner run scan",
   },

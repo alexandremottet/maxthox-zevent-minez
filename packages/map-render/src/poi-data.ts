@@ -416,7 +416,7 @@ export const pois: PointOfInterest[] = [
     "type": "chunk",
     "x": -32,
     "y": 128,
-    "level": "almost"
+    "level": "done"
   },
   {
     "title": "c",
@@ -497,7 +497,7 @@ export const pois: PointOfInterest[] = [
     "x": 48,
     "y": -112,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 48,
@@ -1343,7 +1343,7 @@ export const pois: PointOfInterest[] = [
     "x": 1216,
     "y": 160,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": -224,
@@ -1475,12 +1475,648 @@ export const pois: PointOfInterest[] = [
     "x": 0,
     "y": 0,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 128,
     "y": -96,
     "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": -16,
+    "y": -176,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": -16,
+    "y": -160,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": -16,
+    "y": -144,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": -16,
+    "y": 96,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": -16,
+    "y": 112,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": -16,
+    "y": 128,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 32,
+    "y": -192,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 0,
+    "y": -176,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 16,
+    "y": -176,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 32,
+    "y": -176,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 48,
+    "y": -176,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 0,
+    "y": -160,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 16,
+    "y": -160,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 32,
+    "y": -160,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 48,
+    "y": -160,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 64,
+    "y": -160,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 80,
+    "y": -160,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 96,
+    "y": -160,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 112,
+    "y": -160,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 128,
+    "y": -160,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 144,
+    "y": -160,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 160,
+    "y": -160,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 16,
+    "y": -144,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 32,
+    "y": -144,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 48,
+    "y": -144,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 64,
+    "y": -144,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 80,
+    "y": -144,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 96,
+    "y": -144,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 112,
+    "y": -144,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 128,
+    "y": -144,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 144,
+    "y": -144,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 160,
+    "y": -144,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 128,
+    "y": -128,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 144,
+    "y": -128,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 160,
+    "y": -128,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 112,
+    "y": -112,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 128,
+    "y": -112,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 144,
+    "y": -112,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 160,
+    "y": -112,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 112,
+    "y": -96,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 144,
+    "y": -96,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 160,
+    "y": -96,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 128,
+    "y": -80,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 144,
+    "y": -80,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 160,
+    "y": -80,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 176,
+    "y": -80,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 176,
+    "y": -64,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 192,
+    "y": -48,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 176,
+    "y": -32,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 192,
+    "y": -32,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 0,
+    "y": 16,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 112,
+    "y": 16,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 128,
+    "y": 16,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 144,
+    "y": 16,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 112,
+    "y": 32,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 128,
+    "y": 32,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 144,
+    "y": 32,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 96,
+    "y": 48,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 112,
+    "y": 48,
+    "type": "chunk",
     "level": "almost"
+  },
+  {
+    "x": 144,
+    "y": 48,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 32,
+    "y": 64,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 48,
+    "y": 64,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 64,
+    "y": 64,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 80,
+    "y": 64,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 96,
+    "y": 64,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 112,
+    "y": 64,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 128,
+    "y": 64,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 0,
+    "y": 80,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 16,
+    "y": 80,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 32,
+    "y": 80,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 48,
+    "y": 80,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 64,
+    "y": 80,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 80,
+    "y": 80,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 96,
+    "y": 80,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 112,
+    "y": 80,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 0,
+    "y": 96,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 16,
+    "y": 96,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 32,
+    "y": 96,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 48,
+    "y": 96,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 64,
+    "y": 96,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 80,
+    "y": 96,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 96,
+    "y": 96,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 112,
+    "y": 96,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 0,
+    "y": 112,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 16,
+    "y": 112,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 32,
+    "y": 112,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 48,
+    "y": 112,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 64,
+    "y": 112,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 80,
+    "y": 112,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 0,
+    "y": 128,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 32,
+    "y": 128,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 48,
+    "y": 128,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 64,
+    "y": 128,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 32,
+    "y": 176,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 608,
+    "y": 1520,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 640,
+    "y": 1520,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 624,
+    "y": 1536,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 1184,
+    "y": 176,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 1248,
+    "y": 176,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 1264,
+    "y": 176,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 1184,
+    "y": 192,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 1264,
+    "y": 192,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 1264,
+    "y": 208,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 1280,
+    "y": 176,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 1280,
+    "y": 192,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 1280,
+    "y": 208,
+    "type": "chunk",
+    "level": "done"
   }
 ];
