@@ -24,23 +24,18 @@ export function loadMineChunks() {
   return chunks;
 }
 
-// regionChunks = chunks per region side (32 for Anvil .mca, 16 for VoxelMap's .zip)
-export function regionKeepSet(mineChunks, radius, regionChunks) {
-  const keep = new Set();
-  const drop = new Set();
-  return {
-    shouldKeep(rx, rz) {
-      const key = `${rx},${rz}`;
-      if (keep.has(key)) return true;
-      if (drop.has(key)) return false;
-      const minCx = rx * regionChunks - radius;
-      const maxCx = rx * regionChunks + regionChunks - 1 + radius;
-      const minCz = rz * regionChunks - radius;
-      const maxCz = rz * regionChunks + regionChunks - 1 + radius;
-      const hit = mineChunks.some(({ cx, cz }) => cx >= minCx && cx <= maxCx && cz >= minCz && cz <= maxCz);
-      (hit ? keep : drop).add(key);
-      return hit;
-    },
-    counts: () => ({ kept: keep.size, dropped: drop.size }),
-  };
+// exact per-chunk "within radius (Chebyshev/square) of any mine chunk" set,
+// precomputed once by expanding every mine chunk's own (2*radius+1) square —
+// far cheaper than scanning all mine chunks per candidate when there are
+// many candidates to check (every chunk in every region file)
+export function chunkKeepSet(mineChunks, radius) {
+  const keys = new Set();
+  for (const { cx, cz } of mineChunks) {
+    for (let dx = -radius; dx <= radius; dx++) {
+      for (let dz = -radius; dz <= radius; dz++) {
+        keys.add(`${cx + dx},${cz + dz}`);
+      }
+    }
+  }
+  return { isKept: (cx, cz) => keys.has(`${cx},${cz}`) };
 }
