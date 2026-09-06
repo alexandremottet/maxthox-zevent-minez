@@ -6,11 +6,15 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:map": "pnpm --filter voxelmap-to-image run map && pnpm --filter map-render run generate-map",
-    "build": "pnpm run build:map && pnpm run -r build"
+    "build": "pnpm run build:map && pnpm run -r build",
+    "generate": "node scripts/generate.mjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "devDependencies": {
+    "@clack/prompts": "^0.10.0"
+  },
   "devEngines": {
     "packageManager": {
       "name": "pnpm",
