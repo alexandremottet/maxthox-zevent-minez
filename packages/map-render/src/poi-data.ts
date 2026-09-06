@@ -659,7 +659,7 @@ export const pois: PointOfInterest[] = [
     "x": 128,
     "y": -32,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 96,
@@ -683,7 +683,7 @@ export const pois: PointOfInterest[] = [
     "x": 112,
     "y": 0,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 128,
@@ -713,7 +713,7 @@ export const pois: PointOfInterest[] = [
     "x": 96,
     "y": 32,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 176,
@@ -749,7 +749,7 @@ export const pois: PointOfInterest[] = [
     "x": 32,
     "y": 160,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 0,
@@ -815,7 +815,7 @@ export const pois: PointOfInterest[] = [
     "x": 144,
     "y": -48,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 144,
@@ -863,7 +863,7 @@ export const pois: PointOfInterest[] = [
     "x": 64,
     "y": -144,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 96,
@@ -917,19 +917,19 @@ export const pois: PointOfInterest[] = [
     "x": 128,
     "y": -96,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 128,
     "y": -80,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 144,
     "y": -80,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 160,
@@ -953,7 +953,7 @@ export const pois: PointOfInterest[] = [
     "x": 176,
     "y": -64,
     "type": "chunk",
-    "level": "started"
+    "level": "done"
   },
   {
     "x": 160,
@@ -983,13 +983,13 @@ export const pois: PointOfInterest[] = [
     "x": 80,
     "y": 48,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 16,
     "y": 80,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 32,
@@ -1019,7 +1019,7 @@ export const pois: PointOfInterest[] = [
     "x": 80,
     "y": -144,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 112,
@@ -1061,31 +1061,31 @@ export const pois: PointOfInterest[] = [
     "x": 32,
     "y": 64,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 48,
     "y": 64,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 64,
     "y": 64,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 80,
     "y": 64,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 48,
     "y": 80,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 64,
@@ -1175,13 +1175,13 @@ export const pois: PointOfInterest[] = [
     "x": 16,
     "y": -144,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 32,
     "y": -144,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 48,
@@ -1193,13 +1193,13 @@ export const pois: PointOfInterest[] = [
     "x": 64,
     "y": 112,
     "type": "chunk",
-    "level": "ongoing"
+    "level": "done"
   },
   {
     "x": 32,
     "y": 176,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 320,
@@ -1217,13 +1217,13 @@ export const pois: PointOfInterest[] = [
     "x": 112,
     "y": -144,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 128,
     "y": -144,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 144,
@@ -1235,13 +1235,13 @@ export const pois: PointOfInterest[] = [
     "x": 128,
     "y": -128,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 128,
     "y": -112,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 80,
@@ -1301,49 +1301,49 @@ export const pois: PointOfInterest[] = [
     "x": -16,
     "y": -160,
     "type": "chunk",
-    "level": "started"
+    "level": "done"
   },
   {
     "x": 160,
     "y": -144,
     "type": "chunk",
-    "level": "ongoing"
+    "level": "done"
   },
   {
     "x": 144,
     "y": -128,
     "type": "chunk",
-    "level": "ongoing"
+    "level": "done"
   },
   {
     "x": 160,
     "y": -128,
     "type": "chunk",
-    "level": "ongoing"
+    "level": "done"
   },
   {
     "x": 144,
     "y": -112,
     "type": "chunk",
-    "level": "ongoing"
+    "level": "done"
   },
   {
     "x": 160,
     "y": -112,
     "type": "chunk",
-    "level": "ongoing"
+    "level": "done"
   },
   {
     "x": 144,
     "y": -96,
     "type": "chunk",
-    "level": "ongoing"
+    "level": "done"
   },
   {
     "x": 160,
     "y": -96,
     "type": "chunk",
-    "level": "ongoing"
+    "level": "almost"
   },
   {
     "x": 0,
@@ -1355,7 +1355,7 @@ export const pois: PointOfInterest[] = [
     "x": 0,
     "y": 80,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 0,
@@ -1379,7 +1379,7 @@ export const pois: PointOfInterest[] = [
     "x": 64,
     "y": 128,
     "type": "chunk",
-    "level": "ongoing"
+    "level": "done"
   },
   {
     "x": 608,
@@ -1391,53 +1391,527 @@ export const pois: PointOfInterest[] = [
     "x": 624,
     "y": 1504,
     "type": "chunk",
-    "level": "almost"
+    "level": "done"
   },
   {
     "x": 608,
     "y": 1520,
     "type": "chunk",
-    "level": "started"
+    "level": "done"
   },
   {
     "x": 624,
     "y": 1520,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 640,
     "y": 1520,
     "type": "chunk",
-    "level": "started"
+    "level": "done"
   },
   {
     "x": 624,
     "y": 1536,
     "type": "chunk",
-    "level": "started"
+    "level": "done"
   },
   {
     "x": 0,
     "y": -160,
     "type": "chunk",
-    "level": "started"
+    "level": "done"
   },
   {
     "x": 16,
     "y": -160,
     "type": "chunk",
-    "level": "started"
+    "level": "almost"
   },
   {
     "x": 32,
+    "y": -160,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 96,
+    "y": 48,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": -16,
+    "y": 96,
+    "type": "chunk",
+    "level": "ongoing"
+  },
+  {
+    "x": -16,
+    "y": 112,
+    "type": "chunk",
+    "level": "ongoing"
+  },
+  {
+    "x": 48,
+    "y": -160,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 64,
+    "y": -160,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 80,
     "y": -160,
     "type": "chunk",
     "level": "started"
   },
   {
     "x": 96,
+    "y": -160,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 112,
+    "y": -160,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 128,
+    "y": -160,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 144,
+    "y": -160,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 160,
+    "y": -160,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 112,
+    "y": 16,
+    "type": "chunk",
+    "level": "ongoing"
+  },
+  {
+    "x": 128,
+    "y": 16,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 144,
+    "y": 16,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 112,
+    "y": 32,
+    "type": "chunk",
+    "level": "ongoing"
+  },
+  {
+    "x": 128,
+    "y": 32,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 144,
+    "y": 32,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 112,
     "y": 48,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 96,
+    "y": 64,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 112,
+    "y": 64,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 96,
+    "y": 80,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 112,
+    "y": 80,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 96,
+    "y": 96,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 112,
+    "y": 96,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 1184,
+    "y": 80,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1200,
+    "y": 80,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1216,
+    "y": 80,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 1232,
+    "y": 80,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1248,
+    "y": 80,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1264,
+    "y": 80,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1184,
+    "y": 96,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1200,
+    "y": 96,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1216,
+    "y": 96,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1232,
+    "y": 96,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1248,
+    "y": 96,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1264,
+    "y": 96,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 1184,
+    "y": 112,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1200,
+    "y": 112,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1216,
+    "y": 112,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1232,
+    "y": 112,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1248,
+    "y": 112,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1264,
+    "y": 112,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 1184,
+    "y": 128,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 1200,
+    "y": 128,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1216,
+    "y": 128,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1232,
+    "y": 128,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1248,
+    "y": 128,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1264,
+    "y": 128,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1184,
+    "y": 144,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 1200,
+    "y": 144,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1216,
+    "y": 144,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1232,
+    "y": 144,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1248,
+    "y": 144,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1264,
+    "y": 144,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1184,
+    "y": 160,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 1200,
+    "y": 160,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 1248,
+    "y": 160,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1264,
+    "y": 160,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1184,
+    "y": 176,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 1248,
+    "y": 176,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 1264,
+    "y": 176,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 1264,
+    "y": 192,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 1264,
+    "y": 208,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 1296,
+    "y": 64,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 1312,
+    "y": 64,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1280,
+    "y": 80,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1296,
+    "y": 80,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1312,
+    "y": 80,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1328,
+    "y": 80,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 1280,
+    "y": 96,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1296,
+    "y": 96,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1312,
+    "y": 96,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1328,
+    "y": 96,
+    "type": "chunk",
+    "level": "done"
+  },
+  {
+    "x": 1280,
+    "y": 112,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1280,
+    "y": 128,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1280,
+    "y": 144,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1280,
+    "y": 160,
+    "type": "chunk",
+    "level": "almost"
+  },
+  {
+    "x": 1280,
+    "y": 176,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 1280,
+    "y": 192,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 1280,
+    "y": 208,
     "type": "chunk",
     "level": "started"
   }

@@ -19,13 +19,15 @@ fi
 WORLD_SAVE="$(cd "$WORLD_SAVE" && pwd)"
 
 # most of a WDL capture is surface terrain the player just walked through,
-# unrelated to the mining challenge — dropping whole region files (32x32
-# chunks each) with nothing near a mine-level chunk POI shrinks both the
-# render time and the resulting tile output. On by default; override with
-# BLUEMAP_PRUNE_RADIUS.
-PRUNED_SAVE="$PACKAGE_DIR/.bluemap-pruned-save"
-node "$SCRIPT_DIR/prune-world-save.mjs" --input "$WORLD_SAVE" --output "$PRUNED_SAVE" --radius "${BLUEMAP_PRUNE_RADIUS:-10}"
-WORLD_SAVE="$PRUNED_SAVE"
+# unrelated to the mining challenge — blanking chunks with nothing near a
+# mine-level chunk POI shrinks both the render time and the resulting tile
+# output. On by default (radius 10); set BLUEMAP_PRUNE_RADIUS=off to render
+# (and re-upload to R2) every chunk instead.
+if [ "${BLUEMAP_PRUNE_RADIUS:-10}" != "off" ]; then
+  PRUNED_SAVE="$PACKAGE_DIR/.bluemap-pruned-save"
+  node "$SCRIPT_DIR/prune-world-save.mjs" --input "$WORLD_SAVE" --output "$PRUNED_SAVE" --radius "${BLUEMAP_PRUNE_RADIUS:-10}"
+  WORLD_SAVE="$PRUNED_SAVE"
+fi
 
 JAR="$(find "$CLI_DIR" -maxdepth 1 -name 'bluemap-*-cli.jar' | sort -V | tail -n1)"
 if [ -z "$JAR" ]; then

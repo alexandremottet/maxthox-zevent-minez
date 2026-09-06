@@ -58,7 +58,7 @@ jobs:
       - name: Render BlueMap
         run: pnpm --filter voxelmap-to-image run bluemap
         env:
-          BLUEMAP_PRUNE_RADIUS: "10"
+          BLUEMAP_PRUNE_RADIUS: "off"
           R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
           R2_BUCKET: ${{ secrets.R2_BUCKET }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
