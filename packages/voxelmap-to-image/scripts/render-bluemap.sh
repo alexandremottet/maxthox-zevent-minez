@@ -33,10 +33,21 @@ if ! command -v java >/dev/null 2>&1; then
 fi
 
 MAP_CONFIG="$CLI_DIR/config/maps/overworld.conf"
+WEBAPP_CONFIG="$CLI_DIR/config/webapp.conf"
 # perl -i (not sed -i) since sed's in-place flag syntax differs between BSD
 # (macOS, needs `-i ''`) and GNU (Linux/CI, needs `-i` with no argument) —
 # perl's is identical on both
 perl -i -pe "s|^world: .*|world: \"$WORLD_SAVE\"|" "$MAP_CONFIG"
+
+# tile data (web/maps) is huge — point the webapp at an R2 bucket instead of
+# serving it same-origin, when R2 creds are provided. index.html/js/css stay
+# same-origin either way, which is what apps/voxelmap-viewer's iframe
+# reach-in for live coords/markers actually depends on.
+if [ -n "${R2_PUBLIC_URL:-}" ]; then
+  perl -i -pe "s|^#?\s*map-data-root:.*|map-data-root: \"$R2_PUBLIC_URL/mapdata\"|; \
+               s|^#?\s*live-data-root:.*|live-data-root: \"$R2_PUBLIC_URL/mapdata\"|" \
+    "$WEBAPP_CONFIG"
+fi
 
 # rewrites the marker-sets block from the current chunk POIs (map-render's
 # checked-in poi-data.ts) so BlueMap shows the same level-colored chunk
@@ -68,3 +79,12 @@ for app in voxelmap-viewer voxelmap-admin; do
   cp -R "$CLI_DIR/web/index.html" "$CLI_DIR/web/settings.json" "$CLI_DIR/web/assets" "$CLI_DIR/web/lang" "$CLI_DIR/web/maps" "$CLI_DIR/web/js" "$CLI_DIR/web/css" "$DEST/"
   echo "published to apps/$app/public/bluemap ($(du -sh "$DEST" | cut -f1))"
 done
+
+# kept as a fallback alongside the R2 copy above until it's confirmed working
+# in production — delete apps/*/public/bluemap/maps by hand once it is
+if [ -n "${R2_PUBLIC_URL:-}" ] && [ -n "${R2_BUCKET:-}" ] && [ -n "${R2_ENDPOINT:-}" ]; then
+  echo "syncing tiles to R2 ($R2_BUCKET)..."
+  aws s3 sync "$CLI_DIR/web/maps" "s3://$R2_BUCKET/mapdata" \
+    --endpoint-url "$R2_ENDPOINT" --delete
+  echo "synced to $R2_PUBLIC_URL/mapdata"
+fi
