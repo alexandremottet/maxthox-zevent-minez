@@ -4,10 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "scan": "tsx src/index.ts --input ../voxelmap-to-image/save/minez.mathox1subs.fr/dimensions/minecraft/overworld/region --output ../map-render/src/percent-data.ts --min-y -64 --max-y 20"
+    "scan": "tsx src/index.ts --output ../map-render/src/percent-data.ts"
   },
   "dependencies": {
-    "prismarine-nbt": "^2.7.0"
+    "prismarine-nbt": "^2.7.0",
+    "voxelmap-to-image": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

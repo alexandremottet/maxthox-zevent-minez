@@ -1,16 +1,15 @@
-// Scans the real WDL world save for chunks being dug out (a mining-event
-// challenge). For each chunk, computes the percentage of air blocks between
-// --min-y and --max-y and matches it against the emptiness bands in
-// ../map-render/src/levels.json, then syncs the result into the "pois"
-// MongoDB collection as type:"chunk" POIs, so dig progress shows up on the
-// map with the colors defined there.
+// Scans for chunks being dug out (a mining-event challenge). Computes a
+// per-chunk "how dug is this" percentage via blockdata-scanner's percent
+// source factory (--source voxelmap|wdl, see percent-sources.ts), matches it
+// against the bands in ../map-render/src/levels.json, then syncs the result
+// into the "pois" MongoDB collection as type:"chunk" POIs, so dig progress
+// shows up on the map with the colors defined there.
 //
-//   MONGODB_URI=... tsx src/index.ts --input <dir containing r.X.Z.mca region files> [--min-y -59] [--max-y 20]
+//   MONGODB_URI=... tsx src/index.ts [--source voxelmap|wdl] [--input <dir>]
+//     [--depth-threshold -58] [--min-y -64] [--max-y 20]
 import { readFileSync } from "node:fs";
-import { availableParallelism } from "node:os";
 import { fileURLToPath } from "node:url";
-import { Worker } from "node:worker_threads";
-import { listRegionFiles, type RegionFile } from "blockdata-scanner/src/anvil.ts";
+import { getPercentSource, type ChunkPercent } from "blockdata-scanner/src/percent-sources.ts";
 import { MongoClient, type Document } from "mongodb";
 // type-only: map-render's barrel also pulls in Leaflet (browser-only), which
 // crashes in this Node CLI context, so import just the types (erased at
@@ -23,8 +22,8 @@ const CHUNK_SIZE = 16;
 
 interface ChunkLevel {
   name: string;
-  // a chunk is assigned to whichever level's range contains its emptiness
-  // percentage (air blocks / total blocks) in [--min-y, --max-y]
+  // a chunk is assigned to whichever level's range contains its "how dug"
+  // percentage, computed by whichever percent source is selected
   percentMin: number;
   percentMax: number;
   color: string;
@@ -41,39 +40,35 @@ interface ScannedChunk {
   level: string;
 }
 
-function parseArgs(argv: string[]): { inputDir: string; minY: number; maxY: number } {
+function parseArgs(argv: string[]) {
   const get = (flag: string): string | undefined => {
     const i = argv.indexOf(flag);
     return i === -1 ? undefined : argv[i + 1];
   };
 
-  const inputDir = get("--input");
-  if (!inputDir) throw new Error("missing --input <directory containing r.X.Z.mca region files>");
+  const source = getPercentSource(get("--source") ?? process.env.PERCENT_SOURCE ?? "voxelmap");
+  const input = get("--input") ?? source.defaultInput;
+  const depthThreshold = get("--depth-threshold");
+  const minY = get("--min-y");
+  const maxY = get("--max-y");
 
-  return { inputDir, minY: Number(get("--min-y") ?? -59), maxY: Number(get("--max-y") ?? 20) };
+  return {
+    source,
+    input,
+    depthThreshold: depthThreshold === undefined ? undefined : Number(depthThreshold),
+    minY: minY === undefined ? undefined : Number(minY),
+    maxY: maxY === undefined ? undefined : Number(maxY),
+  };
 }
 
-function scanRegionsInWorker(regions: RegionFile[], levels: ChunkLevel[], minY: number, maxY: number): Promise<ScannedChunk[]> {
-  return new Promise((resolve, reject) => {
-    const worker = new Worker(fileURLToPath(new URL("./scan-worker.ts", import.meta.url)), {
-      workerData: { regions, levels, minY, maxY },
-    });
-    worker.once("message", (result: ScannedChunk[]) => resolve(result));
-    worker.once("error", reject);
-  });
-}
-
-// regions are fully independent of each other, so scanning is split across
-// one worker_thread per CPU core — decompressing+parsing NBT for thousands
-// of chunks is CPU-bound, this is where the real time goes (see scan-worker.ts)
-async function findDugChunks(inputDir: string, minY: number, maxY: number, levels: ChunkLevel[]): Promise<ScannedChunk[]> {
-  const regions = listRegionFiles(inputDir);
-  const workerCount = Math.max(1, Math.min(availableParallelism(), regions.length));
-  const slices: RegionFile[][] = Array.from({ length: workerCount }, () => []);
-  regions.forEach((region, i) => slices[i % workerCount].push(region));
-
-  const results = await Promise.all(slices.filter((slice) => slice.length > 0).map((slice) => scanRegionsInWorker(slice, levels, minY, maxY)));
-  return results.flat();
+function classifyChunks(percents: ChunkPercent[], levels: ChunkLevel[]): ScannedChunk[] {
+  const found: ScannedChunk[] = [];
+  for (const { x, z, percent } of percents) {
+    const matched = levels.find((level) => percent >= level.percentMin && percent <= level.percentMax);
+    if (!matched) continue;
+    found.push({ worldX: x, worldZ: z, level: matched.name });
+  }
+  return found;
 }
 
 // an existing chunk POI "notes" this chunk if its recorded origin falls
@@ -91,13 +86,14 @@ async function main(): Promise<void> {
   if (!MONGODB_URI) throw new Error("missing required env var: MONGODB_URI");
 
   const levels = loadLevels();
-  const { inputDir, minY, maxY } = parseArgs(process.argv.slice(2));
-  const dugChunks = await findDugChunks(inputDir, minY, maxY, levels);
+  const { source, input, depthThreshold, minY, maxY } = parseArgs(process.argv.slice(2));
+  const percents = source.compute({ input, depthThreshold, minY, maxY });
+  const dugChunks = classifyChunks(percents, levels);
 
   const byLevel = new Map<string, number>();
   for (const { level } of dugChunks) byLevel.set(level, (byLevel.get(level) ?? 0) + 1);
   const summary = levels.map((l) => `${l.name}=${byLevel.get(l.name) ?? 0}`).join(", ");
-  console.log(`found ${dugChunks.length} chunk(s) in Y[${minY}, ${maxY}]: ${summary}`);
+  console.log(`found ${dugChunks.length} chunk(s) via "${source.name}": ${summary}`);
 
   const client = new MongoClient(MONGODB_URI);
   await client.connect();

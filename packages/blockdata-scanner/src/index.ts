@@ -1,78 +1,52 @@
-// Computes, per chunk, the percentage of air blocks within a fixed Y range,
-// directly from a real Minecraft world save (region .mca files with full
-// block data) — a more precise alternative to chunk-scanner's surface-height
-// based classification. Kept fully separate: writes a standalone generated
-// file, does not touch chunk-scanner, levels.json, or the "pois" collection.
+// Computes, per chunk, a "how dug is this" percentage and writes it to
+// map-render/src/percent-data.ts (consumed by both map views — Leaflet and
+// BlueMap). Two interchangeable ways to compute it, picked via --source /
+// PERCENT_SOURCE — see percent-sources.ts for what each one actually does
+// and why you'd pick one over the other.
 //
-//   tsx src/index.ts --input <dir containing r.X.Z.mca files> --output <path.ts> [--min-y -64] [--max-y 20]
-
+//   tsx src/index.ts --output <path.ts> [--source voxelmap|wdl] [--input <dir>]
+//     [--depth-threshold -58] [--min-y -64] [--max-y 20]
 import { writeFileSync } from "node:fs";
-import { CHUNKS_PER_REGION_SIDE, listRegionFiles, loadChunkNbt } from "./anvil.ts";
-import { chunkAirPercent, type ChunkPercent } from "./percent.ts";
+import { getPercentSource } from "./percent-sources.ts";
 
-function parseArgs(argv: string[]): { input: string; output: string; minY: number; maxY: number } {
+function parseArgs(argv: string[]) {
   const get = (flag: string): string | undefined => {
     const i = argv.indexOf(flag);
     return i === -1 ? undefined : argv[i + 1];
   };
 
-  const input = get("--input");
+  const source = getPercentSource(get("--source") ?? process.env.PERCENT_SOURCE ?? "voxelmap");
+  const input = get("--input") ?? source.defaultInput;
   const output = get("--output");
-  if (!input) throw new Error("missing --input <directory containing r.X.Z.mca files>");
   if (!output) throw new Error("missing --output <path to write the generated .ts file>");
 
+  const depthThreshold = get("--depth-threshold");
+  const minY = get("--min-y");
+  const maxY = get("--max-y");
+
   return {
+    source,
     input,
     output,
-    minY: Number(get("--min-y") ?? -64),
-    maxY: Number(get("--max-y") ?? 20),
+    depthThreshold: depthThreshold === undefined ? undefined : Number(depthThreshold),
+    minY: minY === undefined ? undefined : Number(minY),
+    maxY: maxY === undefined ? undefined : Number(maxY),
   };
 }
 
 async function main(): Promise<void> {
-  const { input, output, minY, maxY } = parseArgs(process.argv.slice(2));
-  const regionFiles = listRegionFiles(input);
-
-  const results: ChunkPercent[] = [];
-  let skipped = 0;
-
-  for (const region of regionFiles) {
-    for (let localZ = 0; localZ < CHUNKS_PER_REGION_SIDE; localZ++) {
-      for (let localX = 0; localX < CHUNKS_PER_REGION_SIDE; localX++) {
-        let chunkRoot;
-        try {
-          chunkRoot = loadChunkNbt(region.path, localX, localZ);
-        } catch (error) {
-          console.warn(`failed to read chunk (${localX},${localZ}) in ${region.path}: ${(error as Error).message}`);
-          skipped++;
-          continue;
-        }
-        if (!chunkRoot) continue;
-
-        const percent = chunkAirPercent(chunkRoot, minY, maxY);
-        if (percent === undefined) continue;
-
-        results.push({
-          x: (region.regionX * CHUNKS_PER_REGION_SIDE + localX) * 16,
-          z: (region.regionZ * CHUNKS_PER_REGION_SIDE + localZ) * 16,
-          percent,
-        });
-      }
-    }
-  }
+  const { source, input, output, depthThreshold, minY, maxY } = parseArgs(process.argv.slice(2));
+  const results = source.compute({ input, depthThreshold, minY, maxY });
 
   if (results.length === 0) {
-    throw new Error(`no chunks with data found in [${minY}, ${maxY}] under ${input}`);
+    throw new Error(`no chunks with data found under ${input} (source: ${source.name})`);
   }
 
   const percents = results.map((r) => r.percent);
   const min = Math.min(...percents);
   const max = Math.max(...percents);
   const avg = percents.reduce((a, b) => a + b, 0) / percents.length;
-  console.log(
-    `scanned ${results.length} chunk(s) in Y[${minY}, ${maxY}] (${skipped} skipped): ` +
-      `min=${min.toFixed(1)}% max=${max.toFixed(1)}% avg=${avg.toFixed(1)}%`,
-  );
+  console.log(`scanned ${results.length} chunk(s) via "${source.name}": min=${min.toFixed(1)}% max=${max.toFixed(1)}% avg=${avg.toFixed(1)}%`);
 
   writeFileSync(
     output,

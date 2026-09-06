@@ -93,3 +93,64 @@ export function listRegionFiles(dir: string): RegionFile[] {
   }
   return files;
 }
+
+// VoxelMap sometimes caches a column as height=-64 (world floor) with the
+// recorded surface block still "air" — never real terrain (a genuine surface
+// reading is never air), just a not-yet-scanned placeholder that happens to
+// slip past the NO_DATA_HEIGHT check and would otherwise falsely count as
+// "reached the depth threshold".
+const AIR_BLOCK_NAME = /:(air|cave_air|void_air)\}$/;
+const CHUNK_SIZE = 16;
+const CHUNKS_PER_REGION_SIDE = REGION_SIZE / CHUNK_SIZE;
+const COLUMNS_PER_CHUNK = CHUNK_SIZE * CHUNK_SIZE; // 256
+
+export interface ChunkDepthPercent {
+  x: number;
+  z: number;
+  percent: number;
+}
+
+// percentage of a chunk's 256 columns whose recorded VoxelMap height is at
+// or below depthThreshold (i.e. dug down close to bedrock). An unsurveyed
+// column counts against the chunk, not toward it. Chunks with zero surveyed
+// columns (never actually visited, even though their region file exists
+// because a neighboring chunk was) are omitted entirely.
+export function computeDepthPercents(inputDir: string, depthThreshold: number): ChunkDepthPercent[] {
+  const files = listRegionFiles(inputDir);
+  const results: ChunkDepthPercent[] = [];
+
+  for (const file of files) {
+    const region = loadRegion(file.path);
+    const heights = shortPlane(region.data, HEIGHTPOS, true);
+    const blockstates = shortPlane(region.data, BLOCKSTATEPOS, false);
+
+    for (let chunkRow = 0; chunkRow < CHUNKS_PER_REGION_SIDE; chunkRow++) {
+      for (let chunkCol = 0; chunkCol < CHUNKS_PER_REGION_SIDE; chunkCol++) {
+        let reachedDepth = 0;
+        let surveyed = 0;
+        for (let dz = 0; dz < CHUNK_SIZE; dz++) {
+          for (let dx = 0; dx < CHUNK_SIZE; dx++) {
+            const localX = chunkCol * CHUNK_SIZE + dx;
+            const localZ = chunkRow * CHUNK_SIZE + dz;
+            const index = localZ * REGION_SIZE + localX;
+            const height = heights[index];
+            if (height === NO_DATA_HEIGHT) continue;
+            const blockName = region.key.get(blockstates[index]) ?? "";
+            if (AIR_BLOCK_NAME.test(blockName)) continue;
+            surveyed++;
+            if (height <= depthThreshold) reachedDepth++;
+          }
+        }
+        if (surveyed === 0) continue;
+
+        results.push({
+          x: file.x * REGION_SIZE + chunkCol * CHUNK_SIZE,
+          z: file.z * REGION_SIZE + chunkRow * CHUNK_SIZE,
+          percent: (reachedDepth / COLUMNS_PER_CHUNK) * 100,
+        });
+      }
+    }
+  }
+
+  return results;
+}

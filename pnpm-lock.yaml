@@ -275,6 +275,9 @@ importers:
       prismarine-nbt:
         specifier: ^2.7.0
         version: 2.8.0
+      voxelmap-to-image:
+        specifier: workspace:*
+        version: link:../voxelmap-to-image
     devDependencies:
       '@types/node':
         specifier: ^22.10.2

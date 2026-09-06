@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "scan": "tsx --env-file-if-exists=.env.local src/index.ts --input ../voxelmap-to-image/save/minez.mathox1subs.fr/dimensions/minecraft/overworld/region"
+    "scan": "tsx --env-file-if-exists=.env.local src/index.ts"
   },
   "dependencies": {
     "blockdata-scanner": "workspace:*",
