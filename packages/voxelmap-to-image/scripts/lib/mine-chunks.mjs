@@ -24,15 +24,17 @@ export function loadMineChunks() {
   return chunks;
 }
 
-// exact per-chunk "within radius (Chebyshev/square) of any mine chunk" set,
-// precomputed once by expanding every mine chunk's own (2*radius+1) square —
-// far cheaper than scanning all mine chunks per candidate when there are
-// many candidates to check (every chunk in every region file)
+// exact per-chunk "within radius (circular/Euclidean) of any mine chunk"
+// set, precomputed once by expanding every mine chunk's own disc of that
+// radius — far cheaper than scanning all mine chunks per candidate when
+// there are many candidates to check (every chunk in every region file)
 export function chunkKeepSet(mineChunks, radius) {
   const keys = new Set();
+  const radiusSquared = radius * radius;
   for (const { cx, cz } of mineChunks) {
     for (let dx = -radius; dx <= radius; dx++) {
       for (let dz = -radius; dz <= radius; dz++) {
+        if (dx * dx + dz * dz > radiusSquared) continue;
         keys.add(`${cx + dx},${cz + dz}`);
       }
     }

@@ -24,7 +24,7 @@ WORLD_SAVE="$(cd "$WORLD_SAVE" && pwd)"
 # render time and the resulting tile output. On by default; override with
 # BLUEMAP_PRUNE_RADIUS.
 PRUNED_SAVE="$PACKAGE_DIR/.bluemap-pruned-save"
-node "$SCRIPT_DIR/prune-world-save.mjs" --input "$WORLD_SAVE" --output "$PRUNED_SAVE" --radius "${BLUEMAP_PRUNE_RADIUS:-5}"
+node "$SCRIPT_DIR/prune-world-save.mjs" --input "$WORLD_SAVE" --output "$PRUNED_SAVE" --radius "${BLUEMAP_PRUNE_RADIUS:-10}"
 WORLD_SAVE="$PRUNED_SAVE"
 
 JAR="$(find "$CLI_DIR" -maxdepth 1 -name 'bluemap-*-cli.jar' | sort -V | tail -n1)"
