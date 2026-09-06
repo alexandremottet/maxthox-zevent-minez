@@ -13978,6 +13978,11 @@ export const chunkPercents: ChunkPercent[] = [
     "percent": 5.317095588235294
   },
   {
+    "x": 560,
+    "z": 160,
+    "percent": 0.5928308823529411
+  },
+  {
     "x": 512,
     "z": 176,
     "percent": 7.095588235294118
@@ -13986,6 +13991,11 @@ export const chunkPercents: ChunkPercent[] = [
     "x": 528,
     "z": 176,
     "percent": 5.220588235294118
+  },
+  {
+    "x": 544,
+    "z": 176,
+    "percent": 2.8952205882352944
   },
   {
     "x": 512,
@@ -14001,6 +14011,11 @@ export const chunkPercents: ChunkPercent[] = [
     "x": 512,
     "z": 208,
     "percent": 7.950367647058823
+  },
+  {
+    "x": 528,
+    "z": 208,
+    "percent": 10.142463235294118
   },
   {
     "x": 512,
