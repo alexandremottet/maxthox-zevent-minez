@@ -34,3 +34,11 @@ packages/voxelmap-to-image/.bluemap-pruned-save/
 # same idea for the VoxelMap cache, made by prune-voxelmap-cache.mjs when
 # VOXELMAP_PRUNE_RADIUS is set — regenerable
 packages/voxelmap-to-image/.voxelmap-pruned-cache/
+
+# fully derived from the committed save + VoxelMap cache — CI regenerates
+# all three from scratch every run (run map / generate-map / blockdata-scanner
+# run scan), so committing them was always redundant there. A fresh clone
+# has no map/percent overlay until the pipeline is run once locally.
+packages/voxelmap-to-image/out/
+packages/map-render/src/map-data.ts
+packages/map-render/src/percent-data.ts
