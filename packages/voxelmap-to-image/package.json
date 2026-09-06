@@ -7,7 +7,7 @@
   "types": "src/regions.ts",
   "scripts": {
     "start": "tsx src/index.ts",
-    "map": "tsx src/index.ts --input data/overworld --output out --scale 16",
+    "map": "bash scripts/render-map.sh",
     "bluemap": "bash scripts/render-bluemap.sh",
     "build": "tsc"
   },

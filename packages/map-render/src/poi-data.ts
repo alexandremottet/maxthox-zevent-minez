@@ -1193,7 +1193,7 @@ export const pois: PointOfInterest[] = [
     "x": 64,
     "y": 112,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 32,
@@ -1235,7 +1235,7 @@ export const pois: PointOfInterest[] = [
     "x": 128,
     "y": -128,
     "type": "chunk",
-    "level": "done"
+    "level": "almost"
   },
   {
     "x": 128,
@@ -1253,7 +1253,7 @@ export const pois: PointOfInterest[] = [
     "x": 80,
     "y": 112,
     "type": "chunk",
-    "level": "ongoing"
+    "level": "done"
   },
   {
     "x": 912,
@@ -1307,43 +1307,43 @@ export const pois: PointOfInterest[] = [
     "x": 160,
     "y": -144,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 144,
     "y": -128,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 160,
     "y": -128,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 144,
     "y": -112,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 160,
     "y": -112,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 144,
     "y": -96,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 160,
     "y": -96,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 0,
@@ -1361,7 +1361,7 @@ export const pois: PointOfInterest[] = [
     "x": 0,
     "y": 96,
     "type": "chunk",
-    "level": "ongoing"
+    "level": "done"
   },
   {
     "x": 32,
@@ -1379,7 +1379,7 @@ export const pois: PointOfInterest[] = [
     "x": 64,
     "y": 128,
     "type": "chunk",
-    "level": "started"
+    "level": "ongoing"
   },
   {
     "x": 608,
@@ -1414,6 +1414,30 @@ export const pois: PointOfInterest[] = [
   {
     "x": 624,
     "y": 1536,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 0,
+    "y": -160,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 16,
+    "y": -160,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 32,
+    "y": -160,
+    "type": "chunk",
+    "level": "started"
+  },
+  {
+    "x": 96,
+    "y": 48,
     "type": "chunk",
     "level": "started"
   }

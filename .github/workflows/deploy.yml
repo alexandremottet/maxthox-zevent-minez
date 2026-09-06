@@ -33,6 +33,8 @@ jobs:
 
       - name: Generate map image from VoxelMap data
         run: pnpm --filter voxelmap-to-image run map
+        env:
+          VOXELMAP_PRUNE_RADIUS: "5"
 
       - name: Embed map into the shared map-render package
         run: pnpm --filter map-render run generate-map
@@ -56,6 +58,7 @@ jobs:
       - name: Render BlueMap
         run: pnpm --filter voxelmap-to-image run bluemap
         env:
+          BLUEMAP_PRUNE_RADIUS: "5"
           R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
           R2_BUCKET: ${{ secrets.R2_BUCKET }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}

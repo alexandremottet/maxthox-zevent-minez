@@ -18,6 +18,15 @@ if [ ! -d "$WORLD_SAVE" ]; then
 fi
 WORLD_SAVE="$(cd "$WORLD_SAVE" && pwd)"
 
+# most of a WDL capture is surface terrain the player just walked through,
+# unrelated to the mining challenge — dropping whole region files (32x32
+# chunks each) with nothing near a mine-level chunk POI shrinks both the
+# render time and the resulting tile output. On by default; override with
+# BLUEMAP_PRUNE_RADIUS.
+PRUNED_SAVE="$PACKAGE_DIR/.bluemap-pruned-save"
+node "$SCRIPT_DIR/prune-world-save.mjs" --input "$WORLD_SAVE" --output "$PRUNED_SAVE" --radius "${BLUEMAP_PRUNE_RADIUS:-5}"
+WORLD_SAVE="$PRUNED_SAVE"
+
 JAR="$(find "$CLI_DIR" -maxdepth 1 -name 'bluemap-*-cli.jar' | sort -V | tail -n1)"
 if [ -z "$JAR" ]; then
   echo "no bluemap-*-cli.jar found in $CLI_DIR — download one from https://github.com/BlueMap-Minecraft/BlueMap/releases" >&2
@@ -54,16 +63,27 @@ fi
 # outlines as the Leaflet viewer
 node "$SCRIPT_DIR/generate-bluemap-markers.mjs"
 
-# storage compression must stay "none" (config/storages/file.conf) — this
-# stack's static servers (Vite dev/preview, and likely Vercel/GH Pages too)
-# auto-add Content-Encoding: gzip for .gz-suffixed files and decompress
-# transparently, which breaks webapp.conf's client-decompression (it then
-# tries to gzip-decompress the already-decompressed body a second time).
-# Wiping web/maps first (rather than relying on -f alone) avoids stale
-# cross-format leftovers if this ever ran with a different compression setting.
-rm -rf "$CLI_DIR/web/maps"
+# BlueMap's `-r` (without `-f`) only re-renders regions whose chunks changed
+# since the last render — it detects this from render-state it keeps inside
+# web/maps itself. CI checks out a fresh runner every time though, so without
+# seeding web/maps from what's already on R2 first, there's nothing to diff
+# against and every region "changes" (a ~20min full render every run).
+if [ -n "${R2_PUBLIC_URL:-}" ] && [ -n "${R2_BUCKET:-}" ] && [ -n "${R2_ENDPOINT:-}" ]; then
+  echo "seeding web/maps from R2 for incremental render..."
+  mkdir -p "$CLI_DIR/web/maps"
+  aws s3 sync "s3://$R2_BUCKET/mapdata" "$CLI_DIR/web/maps" --endpoint-url "$R2_ENDPOINT"
+else
+  # storage compression must stay "none" (config/storages/file.conf) — this
+  # stack's static servers (Vite dev/preview, and likely Vercel/GH Pages too)
+  # auto-add Content-Encoding: gzip for .gz-suffixed files and decompress
+  # transparently, which breaks webapp.conf's client-decompression (it then
+  # tries to gzip-decompress the already-decompressed body a second time).
+  # Wiping web/maps first (rather than relying on -f alone) avoids stale
+  # cross-format leftovers if this ever ran with a different compression setting.
+  rm -rf "$CLI_DIR/web/maps"
+fi
 echo "rendering $WORLD_SAVE with $(basename "$JAR")..."
-(cd "$CLI_DIR" && java -jar "$(basename "$JAR")" -g -f -r --markers)
+(cd "$CLI_DIR" && java -jar "$(basename "$JAR")" -g -r --markers)
 
 # custom script/style referenced by webapp.conf's `scripts`/`styles` lists —
 # not managed by BlueMap itself, so they have to be placed into the webroot
