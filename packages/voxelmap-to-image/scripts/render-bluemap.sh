@@ -72,16 +72,21 @@ mkdir -p "$CLI_DIR/web/js" "$CLI_DIR/web/css"
 cp "$SCRIPT_DIR/bluemap-default-view.js" "$CLI_DIR/web/js/default-view.js"
 cp "$SCRIPT_DIR/bluemap-percent-label.css" "$CLI_DIR/web/css/percent-label.css"
 
+# when R2 is configured, webapp.conf's map-data-root already points there —
+# skipping the "maps" copy is what actually shrinks the GitHub Pages
+# artifact. Without R2 creds (plain local dev), map-data-root stays the
+# default relative "maps", so it still needs to be copied locally.
 for app in voxelmap-viewer voxelmap-admin; do
   DEST="$REPO_ROOT/apps/$app/public/bluemap"
   rm -rf "$DEST"
   mkdir -p "$DEST"
-  cp -R "$CLI_DIR/web/index.html" "$CLI_DIR/web/settings.json" "$CLI_DIR/web/assets" "$CLI_DIR/web/lang" "$CLI_DIR/web/maps" "$CLI_DIR/web/js" "$CLI_DIR/web/css" "$DEST/"
+  cp -R "$CLI_DIR/web/index.html" "$CLI_DIR/web/settings.json" "$CLI_DIR/web/assets" "$CLI_DIR/web/lang" "$CLI_DIR/web/js" "$CLI_DIR/web/css" "$DEST/"
+  if [ -z "${R2_PUBLIC_URL:-}" ]; then
+    cp -R "$CLI_DIR/web/maps" "$DEST/"
+  fi
   echo "published to apps/$app/public/bluemap ($(du -sh "$DEST" | cut -f1))"
 done
 
-# kept as a fallback alongside the R2 copy above until it's confirmed working
-# in production — delete apps/*/public/bluemap/maps by hand once it is
 if [ -n "${R2_PUBLIC_URL:-}" ] && [ -n "${R2_BUCKET:-}" ] && [ -n "${R2_ENDPOINT:-}" ]; then
   echo "syncing tiles to R2 ($R2_BUCKET)..."
   aws s3 sync "$CLI_DIR/web/maps" "s3://$R2_BUCKET/mapdata" \
